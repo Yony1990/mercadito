@@ -63,6 +63,17 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
   }
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setChatAbierto(true)
+      setMsgs([{
+        role: 'sully',
+        text: '¡Hola! 👋 Soy Sully, tu agente de compras. ¿En qué te puedo ayudar hoy, che? 😄'
+      }])
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [msgs])
 

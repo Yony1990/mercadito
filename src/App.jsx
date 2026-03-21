@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag, Sun, Moon } from 'lucide-react'
+import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag } from 'lucide-react'
 import ListaActiva from './components/ListaActiva'
 import Catalogo from './components/Catalogo'
 import Historial from './components/Historial'
@@ -97,13 +97,22 @@ export default function App() {
             <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
             <span className="logo-text">Mercadito</span>
           </div>
-          <button
-            className="dark-toggle"
-            onClick={() => setDarkMode(p => !p)}
-            title={darkMode ? 'Modo claro' : 'Modo oscuro'}
-          >
-            {darkMode ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
+
+          {/* TOGGLE DÍA/NOCHE */}
+          <div className="toggle">
+            <input
+              className="toggle-input"
+              type="checkbox"
+              checked={darkMode}
+              onChange={() => setDarkMode(p => !p)}
+            />
+            <div className="toggle-bg"></div>
+            <div className="toggle-switch">
+              <div className="toggle-switch-figure"></div>
+              <div className="toggle-switch-figureAlt"></div>
+            </div>
+          </div>
+
         </div>
 
         <nav className="sidebar-nav">
@@ -154,15 +163,29 @@ export default function App() {
             <span>{item.label}</span>
           </button>
         ))}
-        <button
+        {/* Toggle mobile */}
+        <div className="toggle">
+            <input
+              className="toggle-input"
+              type="checkbox"
+              checked={darkMode}
+              onChange={() => setDarkMode(p => !p)}
+            />
+            <div className="toggle-bg"></div>
+            <div className="toggle-switch">
+              <div className="toggle-switch-figure"></div>
+              <div className="toggle-switch-figureAlt"></div>
+            </div>
+          </div>
+        {/* <button
           className="mobile-nav-btn"
           onClick={() => setDarkMode(p => !p)}
         >
           <span className="mobile-nav-icon">
-            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            {darkMode ? '☀️' : '🌙'}
           </span>
           <span>{darkMode ? 'Claro' : 'Oscuro'}</span>
-        </button>
+        </button> */}
       </nav>
 
       <Sully

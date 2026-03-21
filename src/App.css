@@ -23,6 +23,7 @@
   --accent3: #4caf7d;
   --check: #4caf7d;
   --shadow: rgba(60, 40, 80, 0.12);
+  --color-black-text: rgb(14, 14, 14);
   --font-hand: 'Caveat', cursive;
   --font-body: 'Patrick Hand', cursive;
 }
@@ -805,6 +806,9 @@ body {
   border-radius: 16px;
   padding: 8px 0px;
     
+  }
+  .dark .mobile-nav-btn.active {
+    color: var(--color-black-text);
   }
   .mobile-nav-btn.active span:first-child { transform: scale(1.15); }
 }

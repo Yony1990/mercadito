@@ -70,29 +70,40 @@ export default function App() {
     setSullyOpen(true)
   }
 
+  const NAV_ITEMS = [
+    { id: 'lista',    icon: '📝', label: 'Mi Lista' },
+    { id: 'catalogo', icon: '📦', label: 'Catálogo' },
+    { id: 'historial',icon: '📚', label: 'Historial' },
+    { id: 'stats',    icon: '📊', label: 'Stats' },
+  ]
+
   return (
     <div className="app-container">
-      <header className="app-header">
-        <div className="header-logo">
+
+      {/* SIDEBAR desktop / HEADER mobile */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
           <span className="logo-icon">🛒</span>
           <span className="logo-text">Mercadito</span>
         </div>
-        <nav className="app-nav">
-          <button className={`nav-btn ${tab === 'lista' ? 'active' : ''}`} onClick={() => setTab('lista')}>
-            Mi Lista
-          </button>
-          <button className={`nav-btn ${tab === 'catalogo' ? 'active' : ''}`} onClick={() => setTab('catalogo')}>
-            Catálogo
-          </button>
-          <button className={`nav-btn ${tab === 'historial' ? 'active' : ''}`} onClick={() => setTab('historial')}>
-            Historial
-          </button>
-          <button className={`nav-btn ${tab === 'stats' ? 'active' : ''}`} onClick={() => setTab('stats')}>
-            Stats
-          </button>
+        <nav className="sidebar-nav">
+          {NAV_ITEMS.map(item => (
+            <button
+              key={item.id}
+              className={`nav-btn ${tab === item.id ? 'active' : ''}`}
+              onClick={() => setTab(item.id)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </button>
+          ))}
         </nav>
-      </header>
+        <div className="sidebar-footer">
+          <span className="sidebar-version">v1.0</span>
+        </div>
+      </aside>
 
+      {/* CONTENIDO */}
       <main className="app-main">
         <div className="notebook-lines">
           {tab === 'lista' && (
@@ -115,6 +126,20 @@ export default function App() {
           )}
         </div>
       </main>
+
+      {/* MOBILE BOTTOM NAV */}
+      <nav className="mobile-nav">
+        {NAV_ITEMS.map(item => (
+          <button
+            key={item.id}
+            className={`mobile-nav-btn ${tab === item.id ? 'active' : ''}`}
+            onClick={() => setTab(item.id)}
+          >
+            <span>{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
 
       <Sully
         open={sullyOpen}

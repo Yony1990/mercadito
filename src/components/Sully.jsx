@@ -9,6 +9,10 @@ const SUGERENCIAS = [
 ]
 
 const MENSAJES = {
+  saludo: {
+    texto: '¡Hola! 👋 ¿Necesitás ayuda con tu lista de hoy? ¡Acá estoy!',
+    acciones: ['cerrar']
+  },
   viernes: {
     texto: '¡Eyyy, es viernes! 🎉 ¿Ya hiciste la lista para el fin de semana? ¡No te quedes sin nada en la heladera!',
     acciones: ['repetir_ultima', 'cerrar']
@@ -38,6 +42,14 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
   useEffect(() => {
     if (chatAbierto) setTimeout(() => inputRef.current?.focus(), 100)
   }, [chatAbierto])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setOpen(true)
+      setMensajeInicial('saludo')
+    }, 1500)
+    return () => clearTimeout(timer)
+  }, [])
 
   const cerrarBurbuja = () => {
     setOpen(false)
@@ -118,7 +130,7 @@ Datos actuales del usuario:
   const msgActual = mensajeInicial ? MENSAJES[mensajeInicial] : null
 
   return (
-    <div style={{ position: 'fixed', bottom: '16px', right: '16px', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+    <div className="sully-widget" style={{ position: 'fixed', bottom: '16px', right: '16px', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
 
       {/* CHAT */}
       {chatAbierto && (

@@ -9,10 +9,6 @@ const SUGERENCIAS = [
 ]
 
 const MENSAJES = {
-  saludo: {
-    texto: '¡Hola! 👋 ¿Necesitás ayuda con tu lista de hoy? ¡Acá estoy!',
-    acciones: ['cerrar']
-  },
   viernes: {
     texto: '¡Eyyy, es viernes! 🎉 ¿Ya hiciste la lista para el fin de semana? ¡No te quedes sin nada en la heladera!',
     acciones: ['repetir_ultima', 'cerrar']
@@ -27,13 +23,44 @@ const MENSAJES = {
   }
 }
 
-export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial, historial, lista, onRepetirUltima, onAgregarItem }) {
+export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial, historial, lista, onRepetirUltima, onAgregarItem, darkMode }) {
   const [chatAbierto, setChatAbierto] = useState(false)
   const [msgs, setMsgs] = useState([])
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
   const chatEndRef = useRef(null)
   const inputRef = useRef(null)
+
+  const d = darkMode
+
+  const c = {
+    chatBg:      d ? '#1e1e1e' : 'var(--paper, #fdf9f0)',
+    chatBorder:  d ? '2px solid #333' : '2px solid #2aacac',
+    headerBg:    d ? '#252525' : 'var(--paper2, #f7f2e4)',
+    headerBorder:d ? '1px solid #333' : '1px solid #c8d8f0',
+    titleColor:  d ? '#6aaa8a' : '#1a8080',
+    subtitleColor:d ? '#555' : '#7a6f8c',
+    msgsBg:      d ? '#1e1e1e' : 'transparent',
+    sullyMsgBg:  d ? '#252525' : 'var(--paper2, #f7f2e4)',
+    sullyMsgColor:d ? '#c0c0c0' : '#2c2035',
+    userMsgBg:   d ? '#333' : '#2aacac',
+    userMsgColor:d ? '#e0e0e0' : 'white',
+    loadingBg:   d ? '#252525' : 'var(--paper2, #f7f2e4)',
+    loadingColor:d ? '#555' : '#7a6f8c',
+    inputBorder: d ? '1.5px solid #333' : '1.5px solid #c8d8f0',
+    inputBg:     d ? '#252525' : 'var(--paper, #fdf9f0)',
+    inputColor:  d ? '#c0c0c0' : 'var(--ink, #2c2035)',
+    inputFooter: d ? '#1e1e1e' : 'transparent',
+    footerBorder:d ? '1px solid #333' : '1px solid #c8d8f0',
+    sendBg:      d ? '#6aaa8a' : '#2aacac',
+    sendHover:   d ? '#5a9a7a' : '#1a9090',
+    chipBorder:  d ? '1.5px solid #444' : '1.5px solid #2aacac',
+    chipColor:   d ? '#888' : '#1a8080',
+    closeBtnColor:d ? '#666' : '#7a6f8c',
+    bubbleBg:    d ? '#1e1e1e' : 'white',
+    bubbleBorder:d ? '2px solid #333' : '2px solid #2aacac',
+    bubbleText:  d ? '#c0c0c0' : '#2c2035',
+  }
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -42,14 +69,6 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
   useEffect(() => {
     if (chatAbierto) setTimeout(() => inputRef.current?.focus(), 100)
   }, [chatAbierto])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setOpen(true)
-      setMensajeInicial('saludo')
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [])
 
   const cerrarBurbuja = () => {
     setOpen(false)
@@ -61,10 +80,8 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1)
     const inicioSemana = new Date(ahora)
     inicioSemana.setDate(ahora.getDate() - ahora.getDay())
-
     const comprasMes = historial.filter(c => new Date(c.fecha) >= inicioMes)
     const comprasSemana = historial.filter(c => new Date(c.fecha) >= inicioSemana)
-
     const contarItems = (compras) => {
       const conteo = {}
       compras.forEach(c => c.items.forEach(i => {
@@ -73,9 +90,7 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
       }))
       return Object.entries(conteo).sort((a, b) => b[1] - a[1]).slice(0, 8)
     }
-
     const sobrantes = lista.filter(i => i.sobrante).map(i => i.nombre)
-
     return `Sos Sully, el amigo personal de compras del mercadito. Sos un monstruito turquesa peludo, simpático, divertido y muy cálido.
 
 Tu personalidad:
@@ -90,8 +105,8 @@ Datos actuales del usuario:
 - Lista de hoy (${lista.length} productos): ${lista.map(i => `${i.nombre}(x${i.cantidad || 1})`).join(', ') || 'vacía'}
 - Sobrantes marcados: ${sobrantes.join(', ') || 'ninguno'}
 - Compras este mes: ${comprasMes.length} | Esta semana: ${comprasSemana.length} | Total historial: ${historial.length}
-- Top este mes: ${contarItems(comprasMes).map(([n, c]) => `${n}(×${c})`).join(', ') || 'sin datos aún'}
-- Top esta semana: ${contarItems(comprasSemana).map(([n, c]) => `${n}(×${c})`).join(', ') || 'sin datos aún'}
+- Top este mes: ${contarItems(comprasMes).map(([n, cv]) => `${n}(×${cv})`).join(', ') || 'sin datos aún'}
+- Top esta semana: ${contarItems(comprasSemana).map(([n, cv]) => `${n}(×${cv})`).join(', ') || 'sin datos aún'}
 - Hoy es: ${ahora.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long' })}`
   }, [historial, lista])
 
@@ -116,10 +131,9 @@ Datos actuales del usuario:
         })
       })
       const data = await response.json()
-      const respuesta = data.content?.[0]?.text || '¡Uy! Me trabé 😅'
+      const respuesta = data.content?.[0]?.text || '¡Uy! Me trabé 😅 ¿Podés intentar de nuevo?'
       setMsgs(prev => [...prev, { role: 'sully', text: respuesta }])
 
-      // Ejecutar acciones
       if (data.acciones?.length > 0) {
         data.acciones.forEach(accion => {
           if (accion.tipo === 'agregar_item') {
@@ -150,33 +164,33 @@ Datos actuales del usuario:
       {/* CHAT */}
       {chatAbierto && (
         <div style={{
-          background: 'var(--paper, #fdf9f0)', borderRadius: '16px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.18)', width: '300px', maxHeight: '420px',
-          display: 'flex', flexDirection: 'column', border: '2px solid #2aacac',
+          background: c.chatBg, borderRadius: '16px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.25)', width: '300px', maxHeight: '420px',
+          display: 'flex', flexDirection: 'column', border: c.chatBorder,
           overflow: 'hidden', animation: 'sullyIn 0.25s ease-out',
         }}>
           <style>{`@keyframes sullyIn { from { opacity:0; transform:scale(0.88) translateY(8px) } to { opacity:1; transform:scale(1) } }`}</style>
 
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderBottom: '1px solid #c8d8f0', background: 'var(--paper2, #f7f2e4)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderBottom: c.headerBorder, background: c.headerBg }}>
             <img src={sullyImg} alt="Sully" style={{ width: 40, height: 40, objectFit: 'contain' }} />
             <div>
-              <div style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '15px', fontWeight: 700, color: '#1a8080' }}>Sully</div>
-              <div style={{ fontFamily: 'var(--font-body, sans-serif)', fontSize: '11px', color: '#7a6f8c' }}>tu amigo de compras</div>
+              <div style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '15px', fontWeight: 700, color: c.titleColor }}>Sully</div>
+              <div style={{ fontFamily: 'var(--font-body, sans-serif)', fontSize: '11px', color: c.subtitleColor }}>tu amigo de compras</div>
             </div>
-            <button onClick={() => setChatAbierto(false)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#7a6f8c', lineHeight: 1 }}>✕</button>
+            <button onClick={() => setChatAbierto(false)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: c.closeBtnColor, lineHeight: 1 }}>✕</button>
           </div>
 
           {/* Mensajes */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px', background: c.msgsBg }}>
             {msgs.length === 0 && (
-              <div style={{ background: 'var(--paper2, #f7f2e4)', borderRadius: '12px 12px 12px 4px', padding: '10px 12px', alignSelf: 'flex-start', maxWidth: '92%' }}>
-                <p style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', margin: '0 0 8px', color: '#2c2035', lineHeight: 1.4 }}>
+              <div style={{ background: c.sullyMsgBg, borderRadius: '12px 12px 12px 4px', padding: '10px 12px', alignSelf: 'flex-start', maxWidth: '92%' }}>
+                <p style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', margin: '0 0 8px', color: c.sullyMsgColor, lineHeight: 1.4 }}>
                   ¡Hola! 👋 Soy Sully. Preguntame sobre tus compras, pedime recomendaciones, o simplemente charlemos, che.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {SUGERENCIAS.map(s => (
-                    <button key={s} onClick={() => enviar(s)} style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '12px', padding: '4px 10px', borderRadius: '12px', border: '1.5px solid #2aacac', background: 'none', cursor: 'pointer', color: '#1a8080', textAlign: 'left' }}>
+                    <button key={s} onClick={() => enviar(s)} style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '12px', padding: '4px 10px', borderRadius: '12px', border: c.chipBorder, background: 'none', cursor: 'pointer', color: c.chipColor, textAlign: 'left' }}>
                       {s}
                     </button>
                   ))}
@@ -189,8 +203,8 @@ Datos actuales del usuario:
                 fontFamily: 'var(--font-hand, cursive)', fontSize: '14px',
                 padding: '8px 12px', lineHeight: 1.45, maxWidth: '92%',
                 borderRadius: m.role === 'user' ? '12px 12px 4px 12px' : '12px 12px 12px 4px',
-                background: m.role === 'user' ? '#2aacac' : 'var(--paper2, #f7f2e4)',
-                color: m.role === 'user' ? 'white' : '#2c2035',
+                background: m.role === 'user' ? c.userMsgBg : c.sullyMsgBg,
+                color: m.role === 'user' ? c.userMsgColor : c.sullyMsgColor,
                 alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
               }}>
                 {m.text}
@@ -198,7 +212,7 @@ Datos actuales del usuario:
             ))}
 
             {cargando && (
-              <div style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', padding: '8px 12px', borderRadius: '12px 12px 12px 4px', background: 'var(--paper2, #f7f2e4)', color: '#7a6f8c', alignSelf: 'flex-start' }}>
+              <div style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', padding: '8px 12px', borderRadius: '12px 12px 12px 4px', background: c.loadingBg, color: c.loadingColor, alignSelf: 'flex-start' }}>
                 pensando... 🐾
               </div>
             )}
@@ -206,28 +220,28 @@ Datos actuales del usuario:
           </div>
 
           {/* Input */}
-          <div style={{ display: 'flex', padding: '8px 10px', gap: '6px', borderTop: '1px solid #c8d8f0' }}>
+          <div style={{ display: 'flex', padding: '8px 10px', gap: '6px', borderTop: c.footerBorder, background: c.inputFooter }}>
             <input
               ref={inputRef}
-              style={{ flex: 1, fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', border: '1.5px solid #c8d8f0', borderRadius: '16px', padding: '6px 12px', outline: 'none', background: 'var(--paper, #fdf9f0)', color: 'var(--ink, #2c2035)' }}
+              style={{ flex: 1, fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', border: c.inputBorder, borderRadius: '16px', padding: '6px 12px', outline: 'none', background: c.inputBg, color: c.inputColor }}
               placeholder="Preguntale a Sully..."
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && enviar()}
               disabled={cargando}
             />
-            <button onClick={() => enviar()} disabled={cargando} style={{ width: '34px', height: '34px', borderRadius: '50%', background: cargando ? '#aaa' : '#2aacac', border: 'none', cursor: cargando ? 'default' : 'pointer', color: 'white', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => enviar()} disabled={cargando} style={{ width: '34px', height: '34px', borderRadius: '50%', background: cargando ? '#aaa' : c.sendBg, border: 'none', cursor: cargando ? 'default' : 'pointer', color: 'white', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               ➤
             </button>
           </div>
         </div>
       )}
 
-      {/* BURBUJA NOTIFICACIÓN */}
+      {/* BURBUJA */}
       {open && msgActual && !chatAbierto && (
-        <div style={{ background: 'white', borderRadius: '18px 18px 4px 18px', padding: '12px 16px', maxWidth: '260px', boxShadow: '0 8px 32px rgba(0,0,0,0.15)', border: '2px solid #2aacac', position: 'relative', animation: 'sullyIn 0.3s ease-out' }}>
-          <button onClick={cerrarBurbuja} style={{ position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', background: '#e8a0a0', border: 'none', color: 'white', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-          <p style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '15px', color: '#2c2035', marginBottom: '8px', lineHeight: 1.4 }}>{msgActual.texto}</p>
+        <div style={{ background: c.bubbleBg, borderRadius: '18px 18px 4px 18px', padding: '12px 16px', maxWidth: '260px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', border: c.bubbleBorder, position: 'relative', animation: 'sullyIn 0.3s ease-out' }}>
+          <button onClick={cerrarBurbuja} style={{ position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', background: '#888', border: 'none', color: 'white', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <p style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '15px', color: c.bubbleText, marginBottom: '8px', lineHeight: 1.4 }}>{msgActual.texto}</p>
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
             {msgActual.acciones.includes('repetir_ultima') && (
               <button className="btn-mini verde" onClick={() => { onRepetirUltima(); cerrarBurbuja() }}>🔄 Repetir última</button>
@@ -244,24 +258,10 @@ Datos actuales del usuario:
         alt="Sully"
         onClick={() => { if (open && msgActual) cerrarBurbuja(); else setChatAbierto(p => !p) }}
         title="Hablar con Sully"
-        // style={{
-        //   width: 80,
-        //   height: 80,
-        //   objectFit: 'contain',
-        //   cursor: 'pointer',
-        //   transition: 'transform 0.2s ease',
-        //   filter: open && msgActual && !chatAbierto ? 'drop-shadow(0 0 8px #2aacac)' : 'none',
-        // }}
-        style={{
-          width: 80,
-          height: 80,
-          cursor: 'pointer',
-          transition: 'transform 0.2s ease',
-        }}
+        style={{ width: 80, height: 80, objectFit: 'contain', cursor: 'pointer', transition: 'transform 0.2s ease' }}
         onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
         onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
       />
-
     </div>
   )
 }

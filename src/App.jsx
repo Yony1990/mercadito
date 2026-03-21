@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag } from 'lucide-react'
+import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag, Sun, Moon } from 'lucide-react'
 import ListaActiva from './components/ListaActiva'
 import Catalogo from './components/Catalogo'
 import Historial from './components/Historial'
@@ -26,6 +26,16 @@ export default function App() {
   })
   const [sullyOpen, setSullyOpen] = useState(false)
   const [sullyMensaje, setSullyMensaje] = useState(null)
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('mercadito_theme')
+    if (saved) return saved === 'dark'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode)
+    localStorage.setItem('mercadito_theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
 
   useEffect(() => {
     localStorage.setItem('mercadito_lista', JSON.stringify(lista))
@@ -81,10 +91,20 @@ export default function App() {
     <div className="app-container">
 
       <aside className="sidebar">
-        <div className="sidebar-logo">
-          <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
-          <span className="logo-text">Mercadito</span>
+        <div className="sidebar-top">
+          <div className="sidebar-logo">
+            <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
+            <span className="logo-text">Mercadito</span>
+          </div>
+          <button
+            className="dark-toggle"
+            onClick={() => setDarkMode(p => !p)}
+            title={darkMode ? 'Modo claro' : 'Modo oscuro'}
+          >
+            {darkMode ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
         </div>
+
         <nav className="sidebar-nav">
           {NAV_ITEMS.map(item => (
             <button
@@ -97,9 +117,6 @@ export default function App() {
             </button>
           ))}
         </nav>
-        {/* <div className="sidebar-footer">
-          <span className="sidebar-version">v1.0</span>
-        </div> */}
       </aside>
 
       <main className="app-main">
@@ -136,6 +153,15 @@ export default function App() {
             <span>{item.label}</span>
           </button>
         ))}
+        <button
+          className="mobile-nav-btn"
+          onClick={() => setDarkMode(p => !p)}
+        >
+          <span className="mobile-nav-icon">
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </span>
+          <span>{darkMode ? 'Claro' : 'Oscuro'}</span>
+        </button>
       </nav>
 
       <Sully
@@ -153,6 +179,7 @@ export default function App() {
           if (existe) return prev
           return [...prev, item]
         })}
+        darkMode={darkMode}
       />
     </div>
   )

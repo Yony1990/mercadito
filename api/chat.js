@@ -7,8 +7,28 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
   try {
+    const systemConAcciones = `${req.body.system}
+
+IMPORTANTE — formato de respuesta:
+Siempre respondé con un JSON válido con esta estructura exacta (sin markdown, sin backticks, solo JSON puro):
+{
+  "texto": "tu respuesta aquí",
+  "acciones": []
+}
+
+Si el usuario pide agregar productos a la lista, incluí las acciones así:
+{
+  "texto": "¡Listo! Agregué leche y pan a tu lista, che 🛒",
+  "acciones": [
+    { "tipo": "agregar_item", "nombre": "Leche" },
+    { "tipo": "agregar_item", "nombre": "Pan" }
+  ]
+}
+
+Si NO hay acciones, mandá un array vacío. Nunca rompas el formato JSON.`
+
     const messages = [
-      { role: 'system', content: req.body.system },
+      { role: 'system', content: systemConAcciones },
       ...req.body.messages
     ]
 
@@ -22,12 +42,24 @@ export default async function handler(req, res) {
         model: 'llama-3.1-8b-instant',
         max_tokens: 1000,
         messages,
+        response_format: { type: 'json_object' },
       }),
     })
 
     const data = await response.json()
-    const texto = data.choices?.[0]?.message?.content || '¡Uy! Me trabé 😅'
-    return res.status(200).json({ content: [{ text: texto }] })
+    const raw = data.choices?.[0]?.message?.content || '{}'
+
+    let parsed
+    try {
+      parsed = JSON.parse(raw)
+    } catch {
+      parsed = { texto: raw, acciones: [] }
+    }
+
+    return res.status(200).json({
+      content: [{ text: parsed.texto || '¡Uy! No entendí bien 😅' }],
+      acciones: parsed.acciones || []
+    })
   } catch (error) {
     return res.status(500).json({ error: 'Error al contactar la API' })
   }

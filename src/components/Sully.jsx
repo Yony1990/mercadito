@@ -28,9 +28,14 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
   const [msgs, setMsgs] = useState([])
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
+  const [hasChatted, setHasChatted] = useState(false)
+
   const chatEndRef = useRef(null)
   const inputRef = useRef(null)
-  const [hasChatted, setHasChatted] = useState(false)
+  const autoCloseRef = useRef(null)
+
+
+  
 
   const d = darkMode
 
@@ -78,26 +83,18 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [msgs])
 
+
   useEffect(() => {
-    if (chatAbierto) setTimeout(() => inputRef.current?.focus(), 100)
-    }, [chatAbierto])
+  if (!chatAbierto) return
+  
+  if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
+  
+  autoCloseRef.current = setTimeout(() => {
+    setChatAbierto(false)
+  }, hasChatted ? 30000 : 10000)
 
-    useEffect(() => {
-    if (!chatAbierto || cargando) return
-    const timeout = hasChatted ? 30000 : 5000
-    const timer = setTimeout(() => {
-      setChatAbierto(false)
-    }, timeout)
-    return () => clearTimeout(timer)
-  }, [chatAbierto, msgs, cargando, hasChatted])
-
-  // useEffect(() => {
-  //   if (!chatAbierto) return
-  //   const timer = setTimeout(() => {
-  //     setChatAbierto(false)
-  //   }, 7000)
-  //   return () => clearTimeout(timer)
-  // }, [chatAbierto, msgs, input])
+  return () => clearTimeout(autoCloseRef.current)
+}, [chatAbierto, hasChatted])
 
   const cerrarBurbuja = () => {
     setOpen(false)
@@ -145,6 +142,7 @@ Datos actuales del usuario:
     setInput('')
     setMsgs(prev => [...prev, { role: 'user', text: texto }])
     setCargando(true)
+    setHasChatted(true)
     try {
       const context = buildContext()
       const historialChat = msgs.slice(-10).map(m => ({

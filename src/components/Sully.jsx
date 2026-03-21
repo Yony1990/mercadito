@@ -44,18 +44,23 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     }
     if (escuchando) {
       reconocimientoRef.current?.stop()
-      setEscuchando(false)
       return
     }
     const rec = new SpeechRecognition()
+    // rec.lang = 'es-UY'
+    // rec.interimResults = false
+    // rec.maxAlternatives = 1
     rec.lang = 'es-UY'
-    rec.interimResults = false
+    rec.interimResults = true
     rec.maxAlternatives = 1
+    rec.continuous = true
     rec.onstart = () => setEscuchando(true)
     rec.onresult = (e) => {
-      const texto = e.results[0][0].transcript
+      let texto = ''
+      for (let i = 0; i < e.results.length; i++) {
+        texto += e.results[i][0].transcript
+      }
       setInput(texto)
-      setEscuchando(false)
     }
     rec.onerror = () => setEscuchando(false)
     rec.onend = () => setEscuchando(false)

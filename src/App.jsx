@@ -151,6 +151,11 @@ export default function App() {
         onRepetirUltima={() => {
           if (historial.length > 0) repetirCompra(historial[0])
         }}
+        onAgregarItem={(item) => setLista(prev => {
+          const existe = prev.find(i => i.nombre.toLowerCase() === item.nombre.toLowerCase())
+          if (existe) return prev
+          return [...prev, item]
+        })}
       />
     </div>
   )

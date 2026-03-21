@@ -27,7 +27,7 @@ const MENSAJES = {
   }
 }
 
-export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial, historial, lista, onRepetirUltima }) {
+export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial, historial, lista, onRepetirUltima, onAgregarItem }) {
   const [chatAbierto, setChatAbierto] = useState(false)
   const [msgs, setMsgs] = useState([])
   const [input, setInput] = useState('')
@@ -111,15 +111,30 @@ Datos actuales del usuario:
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
           system: context,
           messages: [...historialChat, { role: 'user', content: texto }]
         })
       })
       const data = await response.json()
-      const respuesta = data.content?.[0]?.text || '¡Uy! Me trabé 😅 ¿Podés intentar de nuevo?'
+      const respuesta = data.content?.[0]?.text || '¡Uy! Me trabé 😅'
       setMsgs(prev => [...prev, { role: 'sully', text: respuesta }])
+
+      // Ejecutar acciones
+      if (data.acciones?.length > 0) {
+        data.acciones.forEach(accion => {
+          if (accion.tipo === 'agregar_item') {
+            onAgregarItem({
+              id: 'sully_' + Date.now() + Math.random(),
+              nombre: accion.nombre,
+              categoriaId: 'otros',
+              checked: false,
+              cantidad: 1,
+              sobrante: false,
+              custom: true
+            })
+          }
+        })
+      }
     } catch {
       setMsgs(prev => [...prev, { role: 'sully', text: '¡Ay, me colgué! 😅 Intentá de nuevo, che.' }])
     } finally {

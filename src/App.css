@@ -1085,7 +1085,9 @@ body {
   transform: scale(1);
 }
 
-
+.sully-widget div::-webkit-scrollbar {
+  display: none;
+}
 
 
 

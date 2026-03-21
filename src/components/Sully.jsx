@@ -138,9 +138,16 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     return () => clearTimeout(timer)
   }, [userName])
 
+  // useEffect(() => {
+  //   chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  // }, [msgs])
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [msgs])
+    if (chatAbierto) {
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'instant' })
+      }, 50)
+    }
+  }, [chatAbierto, msgs])
 
   useEffect(() => {
     if (!chatAbierto) return
@@ -272,7 +279,10 @@ Datos actuales del usuario:
 
           <div style={{
             flex: 1,
+            // overflowY: 'auto',
             overflowY: 'auto',
+            scrollbarWidth: 'none',        // Firefox
+            msOverflowStyle: 'none',       // IE/Edge
             padding: '10px 12px',
             display: 'flex',
             flexDirection: 'column',

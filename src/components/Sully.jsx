@@ -81,6 +81,14 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     if (chatAbierto) setTimeout(() => inputRef.current?.focus(), 100)
   }, [chatAbierto])
 
+  useEffect(() => {
+    if (!chatAbierto) return
+    const timer = setTimeout(() => {
+      setChatAbierto(false)
+    }, 7000)
+    return () => clearTimeout(timer)
+  }, [chatAbierto, msgs, input])
+
   const cerrarBurbuja = () => {
     setOpen(false)
     setMensajeInicial(null)

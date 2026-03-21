@@ -163,7 +163,7 @@ export default function App() {
             <span>{item.label}</span>
           </button>
         ))}
-        {/* Toggle mobile */}
+        
         <div className="toggle">
             <input
               className="toggle-input"
@@ -177,15 +177,7 @@ export default function App() {
               <div className="toggle-switch-figureAlt"></div>
             </div>
           </div>
-        {/* <button
-          className="mobile-nav-btn"
-          onClick={() => setDarkMode(p => !p)}
-        >
-          <span className="mobile-nav-icon">
-            {darkMode ? '☀️' : '🌙'}
-          </span>
-          <span>{darkMode ? 'Claro' : 'Oscuro'}</span>
-        </button> */}
+        
       </nav>
 
       <Sully

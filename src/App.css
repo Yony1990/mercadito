@@ -782,17 +782,24 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    padding: 8px 4px;
+    padding: 8px 0px;
     background: none;
+    border-radius: 16px;
     border: none;
     cursor: pointer;
     font-family: var(--font-hand);
     font-size: 11px;
     color: var(--ink3);
-    transition: all 0.15s;
+    transition: all .2s ease;
   }
   .mobile-nav-btn span:first-child { font-size: 20px; }
-  .mobile-nav-btn.active { color: var(--accent); }
+  .mobile-nav-btn.active { 
+    color: var(--accent);
+  background: #e8f0fe;
+  border-radius: 16px;
+  padding: 8px 0px;
+    
+  }
   .mobile-nav-btn.active span:first-child { transform: scale(1.15); }
 }
 
@@ -921,6 +928,7 @@ body {
   .toggle {
     top: 10px;
     right: 10px;
+    margin-left: 20px;
   }
 }
 
@@ -1066,3 +1074,8 @@ body {
 .toggle-input:checked ~ .toggle-switch .toggle-switch-figureAlt {
   transform: scale(1);
 }
+
+
+
+
+

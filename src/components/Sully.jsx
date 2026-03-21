@@ -138,9 +138,7 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     return () => clearTimeout(timer)
   }, [userName])
 
-  // useEffect(() => {
-  //   chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  // }, [msgs])
+
   useEffect(() => {
     if (chatAbierto) {
       setTimeout(() => {
@@ -290,20 +288,7 @@ Datos actuales del usuario:
             backgroundImage: darkMode ? 'none' : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg transform='translate(10,15) rotate(-15 12 14)' opacity='0.18'%3E%3Cellipse cx='12' cy='16' rx='9' ry='10' fill='%23e05252'/%3E%3Cpath d='M12 6 Q15 1 19 3' stroke='%234a8c3f' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(70,5) rotate(10 12 14)' opacity='0.15'%3E%3Cpath d='M2 4h4l4 12h12l3-9H8' stroke='%235b8dd9' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='10' cy='19' r='2.5' fill='%235b8dd9'/%3E%3Ccircle cx='19' cy='19' r='2.5' fill='%235b8dd9'/%3E%3C/g%3E%3Cg transform='translate(140,20) rotate(20 12 16)' opacity='0.18'%3E%3Cellipse cx='12' cy='18' rx='5' ry='10' fill='%23e8734a'/%3E%3C/g%3E%3Cg transform='translate(30,75) rotate(-30 14 12)' opacity='0.18'%3E%3Cpath d='M4 18 Q8 4 20 4 Q22 4 22 8 Q22 12 12 16 Q6 18 4 18Z' fill='%23f5c842'/%3E%3C/g%3E%3Cg transform='translate(70,130) rotate(-8 12 14)' opacity='0.18'%3E%3Ccircle cx='12' cy='15' r='10' fill='%23e05252'/%3E%3C/g%3E%3Cg transform='translate(148,80) rotate(-20 12 12)' opacity='0.18'%3E%3Cellipse cx='12' cy='13' rx='10' ry='8' fill='%23f5d842'/%3E%3C/g%3E%3C/svg%3E")`,
             backgroundSize: '200px 200px',
           }}>
-            {msgs.length === 0 && (
-              <div style={{ background: c.sullyMsgBg, borderRadius: '12px 12px 12px 4px', padding: '10px 12px', alignSelf: 'flex-start', maxWidth: '92%' }}>
-                <p style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', margin: '0 0 8px', color: c.sullyMsgColor, lineHeight: 1.4 }}>
-                  ¡Hola{userName ? ', ' + userName : ''}! 👋 Soy Sully. Preguntame sobre tus compras, pedime recomendaciones, o simplemente charlemos.
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  {SUGERENCIAS.map(s => (
-                    <button key={s} onClick={() => enviar(s)} style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '12px', padding: '4px 10px', borderRadius: '12px', border: c.chipBorder, background: 'none', cursor: 'pointer', color: c.chipColor, textAlign: 'left' }}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+     
 
             {msgs.map((m, i) => (
               <div key={i} style={{

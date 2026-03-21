@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react'
+import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag } from 'lucide-react'
 import ListaActiva from './components/ListaActiva'
 import Catalogo from './components/Catalogo'
 import Historial from './components/Historial'
 import Estadisticas from './components/Estadisticas'
 import Sully from './components/Sully'
 import './App.css'
+
+const NAV_ITEMS = [
+  { id: 'lista',     icon: <ShoppingCart size={18} />, label: 'Mi Lista' },
+  { id: 'catalogo',  icon: <BookOpen size={18} />,     label: 'Catálogo' },
+  { id: 'historial', icon: <History size={18} />,      label: 'Historial' },
+  { id: 'stats',     icon: <BarChart2 size={18} />,    label: 'Stats' },
+]
 
 export default function App() {
   const [tab, setTab] = useState('lista')
@@ -27,7 +35,6 @@ export default function App() {
     localStorage.setItem('mercadito_historial', JSON.stringify(historial))
   }, [historial])
 
-  // Notificación viernes
   useEffect(() => {
     const hoy = new Date()
     const esViernes = hoy.getDay() === 5
@@ -70,20 +77,12 @@ export default function App() {
     setSullyOpen(true)
   }
 
-  const NAV_ITEMS = [
-    { id: 'lista',    icon: '📝', label: 'Mi Lista' },
-    { id: 'catalogo', icon: '📦', label: 'Catálogo' },
-    { id: 'historial',icon: '📚', label: 'Historial' },
-    { id: 'stats',    icon: '📊', label: 'Stats' },
-  ]
-
   return (
     <div className="app-container">
 
-      {/* SIDEBAR desktop / HEADER mobile */}
       <aside className="sidebar">
         <div className="sidebar-logo">
-          <span className="logo-icon">🛒</span>
+          <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
           <span className="logo-text">Mercadito</span>
         </div>
         <nav className="sidebar-nav">
@@ -98,12 +97,11 @@ export default function App() {
             </button>
           ))}
         </nav>
-        <div className="sidebar-footer">
+        {/* <div className="sidebar-footer">
           <span className="sidebar-version">v1.0</span>
-        </div>
+        </div> */}
       </aside>
 
-      {/* CONTENIDO */}
       <main className="app-main">
         <div className="notebook-lines">
           {tab === 'lista' && (
@@ -127,7 +125,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* MOBILE BOTTOM NAV */}
       <nav className="mobile-nav">
         {NAV_ITEMS.map(item => (
           <button
@@ -135,7 +132,7 @@ export default function App() {
             className={`mobile-nav-btn ${tab === item.id ? 'active' : ''}`}
             onClick={() => setTab(item.id)}
           >
-            <span>{item.icon}</span>
+            <span className="mobile-nav-icon">{item.icon}</span>
             <span>{item.label}</span>
           </button>
         ))}

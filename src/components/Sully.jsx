@@ -159,7 +159,7 @@ Datos actuales del usuario:
   const msgActual = mensajeInicial ? MENSAJES[mensajeInicial] : null
 
   return (
-    <div className="sully-widget" style={{ position: 'fixed', bottom: '16px', right: '16px', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+    <div className="sully-widget" style={{ position: 'fixed', bottom: '20px', right: '16px', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
 
       {/* CHAT */}
       {chatAbierto && (
@@ -176,7 +176,7 @@ Datos actuales del usuario:
             <img src={sullyImg} alt="Sully" style={{ width: 40, height: 40, objectFit: 'contain' }} />
             <div>
               <div style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '15px', fontWeight: 700, color: c.titleColor }}>Sully</div>
-              <div style={{ fontFamily: 'var(--font-body, sans-serif)', fontSize: '11px', color: c.subtitleColor }}>tu amigo de compras</div>
+              <div style={{ fontFamily: 'var(--font-body, sans-serif)', fontSize: '11px', color: c.subtitleColor }}>tu agente de compras</div>
             </div>
             <button onClick={() => setChatAbierto(false)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: c.closeBtnColor, lineHeight: 1 }}>✕</button>
           </div>

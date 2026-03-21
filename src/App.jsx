@@ -27,11 +27,6 @@ export default function App() {
   const [sullyOpen, setSullyOpen] = useState(false)
   const [sullyMensaje, setSullyMensaje] = useState(null)
 
-  // const [darkMode, setDarkMode] = useState(() => {
-  //   const saved = localStorage.getItem('mercadito_theme')
-  //   if (saved) return saved === 'dark'
-  //   return window.matchMedia('(prefers-color-scheme: dark)').matches
-  // })
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('mercadito_theme')
     if (saved) return saved === 'dark'

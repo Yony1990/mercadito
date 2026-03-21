@@ -171,6 +171,10 @@ Datos actuales del usuario:
     setMsgs(prev => [...prev, { role: 'user', text: texto }])
     setCargando(true)
     setHasChatted(true)
+    if (escuchando) {
+      reconocimientoRef.current?.stop()
+      setEscuchando(false)
+    }
     try {
       const context = buildContext()
       const historialChat = msgs.slice(-10).map(m => ({

@@ -32,9 +32,12 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
   const [hasChatted, setHasChatted] = useState(false)
   const [escuchando, setEscuchando] = useState(false)
   const reconocimientoRef = useRef(null)
+  const escuchandoRef = useRef(false)
   const chatEndRef = useRef(null)
   const inputRef = useRef(null)
   const autoCloseRef = useRef(null)
+  const enviandoRef = useRef(false)
+  
 
   const escuchar = () => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -42,30 +45,56 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
       alert('Tu browser no soporta el micrófono')
       return
     }
-    if (escuchando) {
+
+    if (escuchandoRef.current) {
+      // Usuario toca para detener — para y guarda lo grabado
+      escuchandoRef.current = false
       reconocimientoRef.current?.stop()
+      setEscuchando(false)
       return
     }
-    const rec = new SpeechRecognition()
-    // rec.lang = 'es-UY'
-    // rec.interimResults = false
-    // rec.maxAlternatives = 1
-    rec.lang = 'es-UY'
-    rec.interimResults = true
-    rec.maxAlternatives = 1
-    rec.continuous = true
-    rec.onstart = () => setEscuchando(true)
-    rec.onresult = (e) => {
-      let texto = ''
-      for (let i = 0; i < e.results.length; i++) {
-        texto += e.results[i][0].transcript
+
+    const iniciarRec = () => {
+      if (!escuchandoRef.current) return
+      const rec = new SpeechRecognition()
+      rec.lang = 'es-UY'
+      rec.interimResults = true
+      rec.maxAlternatives = 1
+      rec.continuous = false
+
+      rec.onstart = () => {
+        setEscuchando(true)
       }
-      setInput(texto)
+
+      rec.onresult = (e) => {
+        if (enviandoRef.current) return
+        let texto = ''
+        for (let i = 0; i < e.results.length; i++) {
+          texto += e.results[i][0].transcript
+        }
+        setInput(texto)
+      }
+
+      rec.onerror = () => {
+        escuchandoRef.current = false
+        setEscuchando(false)
+      }
+
+      rec.onend = () => {
+        // Si sigue activo (no lo canceló el usuario ni enviando), reinicia
+        if (escuchandoRef.current && !enviandoRef.current) {
+          setTimeout(() => iniciarRec(), 100)
+        } else {
+          setEscuchando(false)
+        }
+      }
+
+      reconocimientoRef.current = rec
+      rec.start()
     }
-    rec.onerror = () => setEscuchando(false)
-    rec.onend = () => setEscuchando(false)
-    reconocimientoRef.current = rec
-    rec.start()
+
+    escuchandoRef.current = true
+    iniciarRec()
   }
 
   const d = darkMode
@@ -167,14 +196,16 @@ Datos actuales del usuario:
   const enviar = async (textoOverride) => {
     const texto = (textoOverride || input).trim()
     if (!texto || cargando) return
-    setInput('')
     setMsgs(prev => [...prev, { role: 'user', text: texto }])
     setCargando(true)
     setHasChatted(true)
+    enviandoRef.current = true
+    escuchandoRef.current = false
     if (escuchando) {
       reconocimientoRef.current?.stop()
       setEscuchando(false)
     }
+    setInput('')
     try {
       const context = buildContext()
       const historialChat = msgs.slice(-10).map(m => ({
@@ -212,6 +243,7 @@ Datos actuales del usuario:
       setMsgs(prev => [...prev, { role: 'sully', text: '¡Ay, me colgué! 😅 Intentá de nuevo.' }])
     } finally {
       setCargando(false)
+      enviandoRef.current = false
     }
   }
 

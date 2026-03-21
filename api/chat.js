@@ -16,16 +16,18 @@ Siempre respondé con un JSON válido con esta estructura exacta (sin markdown, 
   "acciones": []
 }
 
-Si el usuario pide agregar productos a la lista, incluí las acciones así:
+Si el usuario pide agregar productos a la lista, incluí las acciones con la cantidad exacta que pidió:
 {
-  "texto": "¡Listo! Agregué leche y pan a tu lista, che 🛒",
+  "texto": "¡Listo! Agregué 3 leches y 5 aguacates a tu lista 🛒",
   "acciones": [
-    { "tipo": "agregar_item", "nombre": "Leche" },
-    { "tipo": "agregar_item", "nombre": "Pan" }
+    { "tipo": "agregar_item", "nombre": "Leche", "cantidad": 3 },
+    { "tipo": "agregar_item", "nombre": "Aguacate", "cantidad": 5 }
   ]
 }
 
-Si NO hay acciones, mandá un array vacío. Nunca rompas el formato JSON.`
+Si el usuario no especifica cantidad, usá 1 por defecto.
+Si NO hay acciones, mandá un array vacío.
+Nunca rompas el formato JSON.`
 
     const messages = [
       { role: 'system', content: systemConAcciones },

@@ -153,7 +153,7 @@ Datos actuales del usuario:
               nombre: accion.nombre,
               categoriaId: 'otros',
               checked: false,
-              cantidad: 1,
+              cantidad: accion.cantidad || 1,
               sobrante: false,
               custom: true
             })
@@ -161,7 +161,7 @@ Datos actuales del usuario:
         })
       }
     } catch {
-      setMsgs(prev => [...prev, { role: 'sully', text: '¡Ay, me colgué! 😅 Intentá de nuevo, che.' }])
+      setMsgs(prev => [...prev, { role: 'sully', text: '¡Ay, me colgué! 😅 Intentá de nuevo.' }])
     } finally {
       setCargando(false)
     }
@@ -172,7 +172,6 @@ Datos actuales del usuario:
   return (
     <div className="sully-widget" style={{ position: 'fixed', bottom: '20px', right: '16px', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
 
-      {/* CHAT */}
       {chatAbierto && (
         <div style={{
           background: c.chatBg, borderRadius: '16px',
@@ -182,7 +181,6 @@ Datos actuales del usuario:
         }}>
           <style>{`@keyframes sullyIn { from { opacity:0; transform:scale(0.88) translateY(8px) } to { opacity:1; transform:scale(1) } }`}</style>
 
-          {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', borderBottom: c.headerBorder, background: c.headerBg }}>
             <img src={sullyImg} alt="Sully" style={{ width: 40, height: 40, objectFit: 'contain' }} />
             <div>
@@ -192,12 +190,11 @@ Datos actuales del usuario:
             <button onClick={() => setChatAbierto(false)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: c.closeBtnColor, lineHeight: 1 }}>✕</button>
           </div>
 
-          {/* Mensajes */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '8px', background: c.msgsBg }}>
             {msgs.length === 0 && (
               <div style={{ background: c.sullyMsgBg, borderRadius: '12px 12px 12px 4px', padding: '10px 12px', alignSelf: 'flex-start', maxWidth: '92%' }}>
                 <p style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', margin: '0 0 8px', color: c.sullyMsgColor, lineHeight: 1.4 }}>
-                  ¡Hola! 👋 Soy Sully. Preguntame sobre tus compras, pedime recomendaciones, o simplemente charlemos, che.
+                  ¡Hola! 👋 Soy Sully. Preguntame sobre tus compras, pedime recomendaciones, o simplemente charlemos.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {SUGERENCIAS.map(s => (
@@ -230,11 +227,10 @@ Datos actuales del usuario:
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input */}
           <div style={{ display: 'flex', padding: '8px 10px', gap: '6px', borderTop: c.footerBorder, background: c.inputFooter }}>
             <input
               ref={inputRef}
-              style={{ flex: 1, fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', border: c.inputBorder, borderRadius: '16px', padding: '6px 12px', outline: 'none', background: c.inputBg, color: c.inputColor }}
+              style={{ flex: 1, fontFamily: 'var(--font-hand, cursive)', fontSize: '16px', border: c.inputBorder, borderRadius: '16px', padding: '6px 12px', outline: 'none', background: c.inputBg, color: c.inputColor }}
               placeholder="Preguntale a Sully..."
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -248,7 +244,6 @@ Datos actuales del usuario:
         </div>
       )}
 
-      {/* BURBUJA */}
       {open && msgActual && !chatAbierto && (
         <div style={{ background: c.bubbleBg, borderRadius: '18px 18px 4px 18px', padding: '12px 16px', maxWidth: '260px', boxShadow: '0 8px 32px rgba(0,0,0,0.2)', border: c.bubbleBorder, position: 'relative', animation: 'sullyIn 0.3s ease-out' }}>
           <button onClick={cerrarBurbuja} style={{ position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', background: '#888', border: 'none', color: 'white', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
@@ -263,7 +258,6 @@ Datos actuales del usuario:
         </div>
       )}
 
-      {/* BOTÓN SULLY */}
       <img
         src={sullyImg}
         alt="Sully"

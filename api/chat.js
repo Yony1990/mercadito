@@ -7,17 +7,22 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 1000,
+        messages: req.body.messages,
+        system: req.body.system,
+      }),
     })
     const data = await response.json()
-    return res.status(response.status).json(data)
+    const texto = data.choices?.[0]?.message?.content || '¡Uy! Me trabé 😅'
+    return res.status(200).json({ content: [{ text: texto }] })
   } catch (error) {
     return res.status(500).json({ error: 'Error al contactar la API' })
   }

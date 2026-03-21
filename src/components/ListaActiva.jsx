@@ -194,11 +194,11 @@ export default function ListaActiva({ lista, setLista, onFinalizar, historial, o
           </>
         )}
 
-        {ultimaCompra && total === 0 && (
+        {/* {ultimaCompra && total === 0 && (
           <button className="btn-secondary" onClick={() => onRepetir(ultimaCompra)}>
             🔄 Repetir última compra
           </button>
-        )}
+        )} */}
       </div>
     </div>
   )

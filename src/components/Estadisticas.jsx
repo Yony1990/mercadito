@@ -32,7 +32,7 @@ export default function Estadisticas({ historial, lista }) {
   // Items que aparecen mucho pero no en lista actual
   const listaIds = new Set(lista.map(i => i.id))
   const noUsadosMes = contarItems(comprasMes)
-    .filter(i => !listaIds.has(i.id.replace('custom_', '')))
+    .filter(i => !listaIds.has((i.id || '').replace('custom_', '')))
     .slice(0, 5)
 
   const totalComprasMes = comprasMes.length

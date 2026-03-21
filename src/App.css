@@ -1,6 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Patrick+Hand&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { 
+  user-select: none; 
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0); 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
 :root {
   --paper: #fdf9f0;

@@ -113,7 +113,7 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
     autoCloseRef.current = setTimeout(() => {
       setChatAbierto(false)
-    }, hasChatted ? 300000 : 10000)
+    }, hasChatted ? 300000 : 20000)
     return () => clearTimeout(autoCloseRef.current)
   }, [chatAbierto, hasChatted])
 

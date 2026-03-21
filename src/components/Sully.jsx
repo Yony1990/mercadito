@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import sullyImg from '../assets/sully.png'
+import { Mic, MicOff } from 'lucide-react'
 
 const SUGERENCIAS = [
   '¿Qué compré más este mes?',
@@ -23,49 +24,73 @@ const MENSAJES = {
   }
 }
 
-export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial, historial, lista, onRepetirUltima, onAgregarItem, darkMode }) {
+export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial, historial, lista, onRepetirUltima, onAgregarItem, darkMode, userName }) {
   const [chatAbierto, setChatAbierto] = useState(false)
   const [msgs, setMsgs] = useState([])
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
   const [hasChatted, setHasChatted] = useState(false)
-
+  const [escuchando, setEscuchando] = useState(false)
+  const reconocimientoRef = useRef(null)
   const chatEndRef = useRef(null)
   const inputRef = useRef(null)
   const autoCloseRef = useRef(null)
 
-
-  
+  const escuchar = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert('Tu browser no soporta el micrófono')
+      return
+    }
+    if (escuchando) {
+      reconocimientoRef.current?.stop()
+      setEscuchando(false)
+      return
+    }
+    const rec = new SpeechRecognition()
+    rec.lang = 'es-UY'
+    rec.interimResults = false
+    rec.maxAlternatives = 1
+    rec.onstart = () => setEscuchando(true)
+    rec.onresult = (e) => {
+      const texto = e.results[0][0].transcript
+      setInput(texto)
+      setEscuchando(false)
+    }
+    rec.onerror = () => setEscuchando(false)
+    rec.onend = () => setEscuchando(false)
+    reconocimientoRef.current = rec
+    rec.start()
+  }
 
   const d = darkMode
 
   const c = {
-    chatBg:      d ? '#1e1e1e' : 'var(--paper, #fdf9f0)',
-    chatBorder:  d ? '2px solid #333' : '2px solid #2aacac',
-    headerBg:    d ? '#252525' : 'var(--paper2, #f7f2e4)',
-    headerBorder:d ? '1px solid #333' : '1px solid #c8d8f0',
-    titleColor:  d ? '#6aaa8a' : '#1a8080',
+    chatBg:       d ? '#1e1e1e' : 'var(--paper, #fdf9f0)',
+    chatBorder:   d ? '2px solid #333' : '2px solid #2aacac',
+    headerBg:     d ? '#252525' : 'var(--paper2, #f7f2e4)',
+    headerBorder: d ? '1px solid #333' : '1px solid #c8d8f0',
+    titleColor:   d ? '#6aaa8a' : '#1a8080',
     subtitleColor:d ? '#555' : '#7a6f8c',
-    msgsBg:      d ? '#1e1e1e' : 'transparent',
-    sullyMsgBg:  d ? '#252525' : 'var(--paper2, #f7f2e4)',
+    msgsBg:       d ? '#1e1e1e' : 'transparent',
+    sullyMsgBg:   d ? '#252525' : 'var(--paper2, #f7f2e4)',
     sullyMsgColor:d ? '#c0c0c0' : '#2c2035',
-    userMsgBg:   d ? '#333' : '#2aacac',
-    userMsgColor:d ? '#e0e0e0' : 'white',
-    loadingBg:   d ? '#252525' : 'var(--paper2, #f7f2e4)',
-    loadingColor:d ? '#555' : '#7a6f8c',
-    inputBorder: d ? '1.5px solid #333' : '1.5px solid #c8d8f0',
-    inputBg:     d ? '#252525' : 'var(--paper, #fdf9f0)',
-    inputColor:  d ? '#c0c0c0' : 'var(--ink, #2c2035)',
-    inputFooter: d ? '#1e1e1e' : 'transparent',
-    footerBorder:d ? '1px solid #333' : '1px solid #c8d8f0',
-    sendBg:      d ? '#6aaa8a' : '#2aacac',
-    sendHover:   d ? '#5a9a7a' : '#1a9090',
-    chipBorder:  d ? '1.5px solid #444' : '1.5px solid #2aacac',
-    chipColor:   d ? '#888' : '#1a8080',
+    userMsgBg:    d ? '#333' : '#2aacac',
+    userMsgColor: d ? '#e0e0e0' : 'white',
+    loadingBg:    d ? '#252525' : 'var(--paper2, #f7f2e4)',
+    loadingColor: d ? '#555' : '#7a6f8c',
+    inputBorder:  d ? '1.5px solid #333' : '1.5px solid #c8d8f0',
+    inputBg:      d ? '#252525' : 'var(--paper, #fdf9f0)',
+    inputColor:   d ? '#c0c0c0' : 'var(--ink, #2c2035)',
+    inputFooter:  d ? '#1e1e1e' : 'transparent',
+    footerBorder: d ? '1px solid #333' : '1px solid #c8d8f0',
+    sendBg:       d ? '#6aaa8a' : '#2aacac',
+    chipBorder:   d ? '1.5px solid #444' : '1.5px solid #2aacac',
+    chipColor:    d ? '#888' : '#1a8080',
     closeBtnColor:d ? '#666' : '#7a6f8c',
-    bubbleBg:    d ? '#1e1e1e' : 'white',
-    bubbleBorder:d ? '2px solid #333' : '2px solid #2aacac',
-    bubbleText:  d ? '#c0c0c0' : '#2c2035',
+    bubbleBg:     d ? '#1e1e1e' : 'white',
+    bubbleBorder: d ? '2px solid #333' : '2px solid #2aacac',
+    bubbleText:   d ? '#c0c0c0' : '#2c2035',
   }
 
   useEffect(() => {
@@ -73,28 +98,24 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
       setChatAbierto(true)
       setMsgs([{
         role: 'sully',
-        text: '¡Hola! 👋 Soy Sully, tu agente de compras. ¿En qué te puedo ayudar hoy? 😄'
+        text: `¡Hola${userName ? ', ' + userName : ''}! 👋 Soy Sully, tu agente de compras. ¿En qué te puedo ayudar hoy? 😄`
       }])
     }, 1500)
     return () => clearTimeout(timer)
-  }, [])
+  }, [userName])
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [msgs])
 
-
   useEffect(() => {
-  if (!chatAbierto) return
-  
-  if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
-  
-  autoCloseRef.current = setTimeout(() => {
-    setChatAbierto(false)
-  }, hasChatted ? 300000 : 10000)
-
-  return () => clearTimeout(autoCloseRef.current)
-}, [chatAbierto, hasChatted])
+    if (!chatAbierto) return
+    if (autoCloseRef.current) clearTimeout(autoCloseRef.current)
+    autoCloseRef.current = setTimeout(() => {
+      setChatAbierto(false)
+    }, hasChatted ? 300000 : 10000)
+    return () => clearTimeout(autoCloseRef.current)
+  }, [chatAbierto, hasChatted])
 
   const cerrarBurbuja = () => {
     setOpen(false)
@@ -119,6 +140,8 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
     const sobrantes = lista.filter(i => i.sobrante).map(i => i.nombre)
     return `Sos Sully, el amigo personal de compras del mercadito. Sos un monstruito turquesa peludo, simpático, divertido y muy cálido.
 
+El nombre del usuario es: ${userName || 'desconocido'}. Usá su nombre de vez en cuando en la conversación para hacerla más personal y cercana, pero sin exagerar.
+
 Tu personalidad:
 - Hablás en español latinoamericano natural, amigable y cercano
 - Sos genuinamente amigable — saludás cuando te saludan, te reís con chistes, tenés humor
@@ -134,7 +157,7 @@ Datos actuales del usuario:
 - Top este mes: ${contarItems(comprasMes).map(([n, cv]) => `${n}(×${cv})`).join(', ') || 'sin datos aún'}
 - Top esta semana: ${contarItems(comprasSemana).map(([n, cv]) => `${n}(×${cv})`).join(', ') || 'sin datos aún'}
 - Hoy es: ${ahora.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long' })}`
-  }, [historial, lista])
+  }, [historial, lista, userName])
 
   const enviar = async (textoOverride) => {
     const texto = (textoOverride || input).trim()
@@ -206,21 +229,20 @@ Datos actuales del usuario:
             <button onClick={() => setChatAbierto(false)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: c.closeBtnColor, lineHeight: 1 }}>✕</button>
           </div>
 
-          <div style={{ 
-            flex: 1, 
-            overflowY: 'auto', 
-            padding: '10px 12px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '8px', 
-             
-            backgroundImage: d ? 'none' : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg transform='translate(10,15) rotate(-15 12 14)' opacity='0.18'%3E%3Cellipse cx='12' cy='16' rx='9' ry='10' fill='%23e05252'/%3E%3Cpath d='M12 6 Q15 1 19 3' stroke='%234a8c3f' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(70,5) rotate(10 12 14)' opacity='0.15'%3E%3Cpath d='M2 4h4l4 12h12l3-9H8' stroke='%235b8dd9' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='10' cy='19' r='2.5' fill='%235b8dd9'/%3E%3Ccircle cx='19' cy='19' r='2.5' fill='%235b8dd9'/%3E%3C/g%3E%3Cg transform='translate(140,20) rotate(20 12 16)' opacity='0.18'%3E%3Cellipse cx='12' cy='18' rx='5' ry='10' fill='%23e8734a'/%3E%3Cpath d='M9 8 Q6 3 5 1M12 7 Q12 2 12 0M15 8 Q18 3 19 1' stroke='%234a8c3f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(30,75) rotate(-30 14 12)' opacity='0.18'%3E%3Cpath d='M4 18 Q8 4 20 4 Q22 4 22 8 Q22 12 12 16 Q6 18 4 18Z' fill='%23f5c842'/%3E%3C/g%3E%3Cg transform='translate(100,65) rotate(5 12 16)' opacity='0.15'%3E%3Cpath d='M4 12 Q4 6 12 6 Q20 6 20 12 L22 28 Q22 30 20 30 H4 Q2 30 2 28 Z' fill='%234caf7d'/%3E%3C/g%3E%3Cg transform='translate(70,130) rotate(-8 12 14)' opacity='0.18'%3E%3Ccircle cx='12' cy='15' r='10' fill='%23e05252'/%3E%3Cpath d='M8 5 Q10 1 12 4M12 4 Q14 1 16 5' stroke='%234a8c3f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(148,80) rotate(-20 12 12)' opacity='0.18'%3E%3Cellipse cx='12' cy='13' rx='10' ry='8' fill='%23f5d842'/%3E%3C/g%3E%3C/svg%3E")`,
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '10px 12px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            backgroundImage: darkMode ? 'none' : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg transform='translate(10,15) rotate(-15 12 14)' opacity='0.18'%3E%3Cellipse cx='12' cy='16' rx='9' ry='10' fill='%23e05252'/%3E%3Cpath d='M12 6 Q15 1 19 3' stroke='%234a8c3f' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(70,5) rotate(10 12 14)' opacity='0.15'%3E%3Cpath d='M2 4h4l4 12h12l3-9H8' stroke='%235b8dd9' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='10' cy='19' r='2.5' fill='%235b8dd9'/%3E%3Ccircle cx='19' cy='19' r='2.5' fill='%235b8dd9'/%3E%3C/g%3E%3Cg transform='translate(140,20) rotate(20 12 16)' opacity='0.18'%3E%3Cellipse cx='12' cy='18' rx='5' ry='10' fill='%23e8734a'/%3E%3C/g%3E%3Cg transform='translate(30,75) rotate(-30 14 12)' opacity='0.18'%3E%3Cpath d='M4 18 Q8 4 20 4 Q22 4 22 8 Q22 12 12 16 Q6 18 4 18Z' fill='%23f5c842'/%3E%3C/g%3E%3Cg transform='translate(70,130) rotate(-8 12 14)' opacity='0.18'%3E%3Ccircle cx='12' cy='15' r='10' fill='%23e05252'/%3E%3C/g%3E%3Cg transform='translate(148,80) rotate(-20 12 12)' opacity='0.18'%3E%3Cellipse cx='12' cy='13' rx='10' ry='8' fill='%23f5d842'/%3E%3C/g%3E%3C/svg%3E")`,
             backgroundSize: '200px 200px',
-            }}>
+          }}>
             {msgs.length === 0 && (
               <div style={{ background: c.sullyMsgBg, borderRadius: '12px 12px 12px 4px', padding: '10px 12px', alignSelf: 'flex-start', maxWidth: '92%' }}>
                 <p style={{ fontFamily: 'var(--font-hand, cursive)', fontSize: '14px', margin: '0 0 8px', color: c.sullyMsgColor, lineHeight: 1.4 }}>
-                  ¡Hola! 👋 Soy Sully. Preguntame sobre tus compras, pedime recomendaciones, o simplemente charlemos.
+                  ¡Hola{userName ? ', ' + userName : ''}! 👋 Soy Sully. Preguntame sobre tus compras, pedime recomendaciones, o simplemente charlemos.
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {SUGERENCIAS.map(s => (
@@ -263,7 +285,18 @@ Datos actuales del usuario:
               onKeyDown={e => e.key === 'Enter' && enviar()}
               disabled={cargando}
             />
-            <button onClick={() => enviar()} disabled={cargando} style={{ width: '34px', height: '34px', borderRadius: '50%', background: cargando ? '#aaa' : c.sendBg, border: 'none', cursor: cargando ? 'default' : 'pointer', color: 'white', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button
+              onClick={escuchar}
+              title="Hablar"
+              style={{ width: '34px', height: '34px', borderRadius: '50%', background: escuchando ? '#e05252' : (darkMode ? '#333' : '#eee'), border: 'none', cursor: 'pointer', color: escuchando ? 'white' : (darkMode ? '#aaa' : '#555'), display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', flexShrink: 0 }}
+            >
+              {escuchando ? <MicOff size={16} /> : <Mic size={16} />}
+            </button>
+            <button
+              onClick={() => enviar()}
+              disabled={cargando}
+              style={{ width: '34px', height: '34px', borderRadius: '50%', background: cargando ? '#aaa' : c.sendBg, border: 'none', cursor: cargando ? 'default' : 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+            >
               ➤
             </button>
           </div>

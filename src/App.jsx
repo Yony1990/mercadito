@@ -5,6 +5,7 @@ import Catalogo from './components/Catalogo'
 import Historial from './components/Historial'
 import Estadisticas from './components/Estadisticas'
 import Sully from './components/Sully'
+import Onboarding from './components/Onboarding'
 import './App.css'
 
 const NAV_ITEMS = [
@@ -26,6 +27,9 @@ export default function App() {
   })
   const [sullyOpen, setSullyOpen] = useState(false)
   const [sullyMensaje, setSullyMensaje] = useState(null)
+  const [userName, setUserName] = useState(() => {
+    return localStorage.getItem('mercadito_nombre') || ''
+  })
 
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('mercadito_theme')
@@ -86,6 +90,15 @@ export default function App() {
     setTab('lista')
     setSullyMensaje('lista_repetida')
     setSullyOpen(true)
+  }
+
+  const handleOnboardingComplete = (nombre) => {
+    localStorage.setItem('mercadito_nombre', nombre)
+    setUserName(nombre)
+  }
+
+  if (!userName) {
+    return <Onboarding onComplete={handleOnboardingComplete} />
   }
 
   return (
@@ -165,18 +178,18 @@ export default function App() {
         ))}
         
         <div className="toggle">
-            <input
-              className="toggle-input"
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(p => !p)}
-            />
-            <div className="toggle-bg"></div>
-            <div className="toggle-switch">
-              <div className="toggle-switch-figure"></div>
-              <div className="toggle-switch-figureAlt"></div>
-            </div>
+          <input
+            className="toggle-input"
+            type="checkbox"
+            checked={darkMode}
+            onChange={() => setDarkMode(p => !p)}
+          />
+          <div className="toggle-bg"></div>
+          <div className="toggle-switch">
+            <div className="toggle-switch-figure"></div>
+            <div className="toggle-switch-figureAlt"></div>
           </div>
+        </div>
         
       </nav>
 
@@ -196,6 +209,7 @@ export default function App() {
           return [...prev, item]
         })}
         darkMode={darkMode}
+        userName={userName}
       />
     </div>
   )

@@ -30,6 +30,7 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
   const [cargando, setCargando] = useState(false)
   const chatEndRef = useRef(null)
   const inputRef = useRef(null)
+  const [hasChatted, setHasChatted] = useState(false)
 
   const d = darkMode
 
@@ -79,15 +80,24 @@ export default function Sully({ open, setOpen, mensajeInicial, setMensajeInicial
 
   useEffect(() => {
     if (chatAbierto) setTimeout(() => inputRef.current?.focus(), 100)
-  }, [chatAbierto])
+    }, [chatAbierto])
 
-  useEffect(() => {
-    if (!chatAbierto) return
+    useEffect(() => {
+    if (!chatAbierto || cargando) return
+    const timeout = hasChatted ? 30000 : 5000
     const timer = setTimeout(() => {
       setChatAbierto(false)
-    }, 7000)
+    }, timeout)
     return () => clearTimeout(timer)
-  }, [chatAbierto, msgs, input])
+  }, [chatAbierto, msgs, cargando, hasChatted])
+
+  // useEffect(() => {
+  //   if (!chatAbierto) return
+  //   const timer = setTimeout(() => {
+  //     setChatAbierto(false)
+  //   }, 7000)
+  //   return () => clearTimeout(timer)
+  // }, [chatAbierto, msgs, input])
 
   const cerrarBurbuja = () => {
     setOpen(false)

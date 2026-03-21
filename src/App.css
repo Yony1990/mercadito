@@ -20,10 +20,19 @@
   --font-body: 'Patrick Hand', cursive;
 }
 
-body {
+/* body {
   background: #d4c9b8;
   background-image: 
     repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(0,0,0,0.015) 35px, rgba(0,0,0,0.015) 70px);
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--ink);
+} */
+
+body {
+  background-color: #f4ebdd;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg transform='translate(10,15) rotate(-15 12 14)' opacity='0.55'%3E%3Cellipse cx='12' cy='16' rx='9' ry='10' fill='%23e05252'/%3E%3Cpath d='M12 6 Q15 1 19 3' stroke='%234a8c3f' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3Cellipse cx='8' cy='12' rx='3' ry='4' fill='white' opacity='0.25'/%3E%3C/g%3E%3Cg transform='translate(70,5) rotate(10 12 14)' opacity='0.5'%3E%3Cpath d='M2 4h4l4 12h12l3-9H8' stroke='%235b8dd9' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='10' cy='19' r='2.5' fill='%235b8dd9'/%3E%3Ccircle cx='19' cy='19' r='2.5' fill='%235b8dd9'/%3E%3C/g%3E%3Cg transform='translate(140,20) rotate(20 12 16)' opacity='0.55'%3E%3Cellipse cx='12' cy='18' rx='5' ry='10' fill='%23e8734a'/%3E%3Cpath d='M9 8 Q6 3 5 1M12 7 Q12 2 12 0M15 8 Q18 3 19 1' stroke='%234a8c3f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(170,60) rotate(-10 12 16)' opacity='0.5'%3E%3Crect x='6' y='8' width='12' height='18' rx='2' fill='%235b8dd9'/%3E%3Cpolygon points='6,8 12,2 18,8' fill='%234a7fc1'/%3E%3Crect x='8' y='13' width='8' height='2' rx='1' fill='white' opacity='0.5'/%3E%3C/g%3E%3Cg transform='translate(30,75) rotate(-30 14 12)' opacity='0.55'%3E%3Cpath d='M4 18 Q8 4 20 4 Q22 4 22 8 Q22 12 12 16 Q6 18 4 18Z' fill='%23f5c842'/%3E%3Cpath d='M20 4 Q24 2 22 8' stroke='%23c9a020' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(100,65) rotate(5 12 16)' opacity='0.5'%3E%3Cpath d='M4 12 Q4 6 12 6 Q20 6 20 12 L22 28 Q22 30 20 30 H4 Q2 30 2 28 Z' fill='%234caf7d'/%3E%3Cpath d='M7 12 Q7 6 12 6 Q17 6 17 12' stroke='white' stroke-width='1.8' fill='none' opacity='0.5'/%3E%3C/g%3E%3Cg transform='translate(148,80) rotate(-20 12 12)' opacity='0.55'%3E%3Cellipse cx='12' cy='13' rx='10' ry='8' fill='%23f5d842'/%3E%3Cellipse cx='8' cy='10' rx='3' ry='3' fill='white' opacity='0.3'/%3E%3Cpath d='M20 8 Q24 6 23 4' stroke='%23c9b020' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(5,140) rotate(10 14 14)' opacity='0.5'%3E%3Cellipse cx='14' cy='16' rx='12' ry='8' fill='%23e8b86d'/%3E%3Cellipse cx='14' cy='13' rx='9' ry='5' fill='%23f5cc8a' opacity='0.6'/%3E%3C/g%3E%3Cg transform='translate(70,130) rotate(-8 12 14)' opacity='0.55'%3E%3Ccircle cx='12' cy='15' r='10' fill='%23e05252'/%3E%3Cpath d='M8 5 Q10 1 12 4M12 4 Q14 1 16 5' stroke='%234a8c3f' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(130,125) rotate(15 15 12)' opacity='0.5'%3E%3Cellipse cx='13' cy='13' rx='11' ry='7' fill='%235b8dd9'/%3E%3Cpath d='M24 13 L32 6 L32 20 Z' fill='%234a7fc1'/%3E%3Ccircle cx='5' cy='11' r='2' fill='white' opacity='0.6'/%3E%3C/g%3E%3Cg transform='translate(170,140) rotate(-25 12 16)' opacity='0.55'%3E%3Cpath d='M12 4 Q18 4 20 10 Q22 18 16 22 Q12 24 8 22 Q2 18 4 10 Q6 4 12 4Z' fill='%234caf7d'/%3E%3Cpath d='M12 4 Q13 1 15 0' stroke='%23357a55' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(35,168) rotate(20 10 13)' opacity='0.5'%3E%3Cellipse cx='10' cy='14' rx='8' ry='10' fill='%23f5e6c8'/%3E%3Cellipse cx='7' cy='11' rx='2.5' ry='3' fill='white' opacity='0.4'/%3E%3C/g%3E%3Cg transform='translate(100,160) rotate(-12 10 16)' opacity='0.5'%3E%3Crect x='6' y='9' width='8' height='17' rx='2' fill='%23e8734a'/%3E%3Crect x='7' y='5' width='6' height='5' rx='1' fill='%23d4622a'/%3E%3Crect x='8' y='3' width='4' height='3' rx='1' fill='%23d4622a'/%3E%3C/g%3E%3Cg transform='translate(155,165) rotate(0 8 8)' opacity='0.3'%3E%3Cpolygon points='8,0 10,6 16,6 11,10 13,16 8,12 3,16 5,10 0,6 6,6' fill='%23f5c842'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 200px 200px;
   min-height: 100vh;
   font-family: var(--font-body);
   color: var(--ink);
@@ -36,11 +45,11 @@ body {
 }
 
 /* SIDEBAR */
-.sidebar {
+/* .sidebar {
   width: 200px;
   min-width: 200px;
   background: var(--paper);
-  border-right: 3px solid var(--red-margin);
+  border-right: 2px solid rgba(11, 87, 168, 0.414);
   display: flex;
   flex-direction: column;
   padding: 28px 16px 20px;
@@ -49,6 +58,23 @@ body {
   height: 100vh;
   box-shadow: 2px 0 12px var(--shadow);
   z-index: 100;
+} */
+
+.sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--paper);
+  border-right: none;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 16px 20px;
+  position: sticky;
+  top: 20px;
+  height: calc(100vh - 40px);
+  margin: 20px 0 20px 20px;
+  box-shadow: 0 4px 24px var(--shadow);
+  z-index: 100;
+  border-radius: 16px;
 }
 
 .sidebar-logo {
@@ -100,7 +126,7 @@ body {
 
 .sidebar-footer {
   padding-top: 16px;
-  border-top: 1px dashed #ddd;
+  border-top: 2px solid var(--accent);
   text-align: center;
 }
 .sidebar-version {
@@ -735,14 +761,27 @@ body {
     padding: 16px 12px 20px 52px;
     min-height: auto;
   }
-  .mobile-nav {
+  /* .mobile-nav {
     display: flex;
     position: fixed;
     bottom: 0; left: 0; right: 0;
     background: var(--paper);
-    border-top: 2px solid var(--red-margin);
+    border-top: 2px solid rgba(11, 87, 168, 0.414);
     z-index: 200;
     box-shadow: 0 -2px 12px var(--shadow);
+  } */
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    background: var(--paper);
+    border-top: none;
+    border-radius: 20px;
+    z-index: 200;
+    box-shadow: 0 4px 24px var(--shadow);
+    padding: 4px;
   }
   .mobile-nav-btn {
     flex: 1;

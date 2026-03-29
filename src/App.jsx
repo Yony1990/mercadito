@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
-import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag } from 'lucide-react'
+import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag, LogOut } from 'lucide-react'
 import ListaActiva from './components/ListaActiva'
 import Catalogo from './components/Catalogo'
 import Historial from './components/Historial'
 import Estadisticas from './components/Estadisticas'
 import Sully from './components/Sully'
 import Onboarding from './components/Onboarding'
+import Login from './components/Login'
+import { useAuth } from './context/AuthContext'
+import { useGrupoData } from './hooks/useGrupoData'
 import './App.css'
 
 const NAV_ITEMS = [
@@ -16,20 +19,13 @@ const NAV_ITEMS = [
 ]
 
 export default function App() {
+  const { user, userDoc, parejaDoc, grupoId, loading, logout } = useAuth()
+  const { lista, historial, actualizarLista, actualizarHistorial, syncing } = useGrupoData(grupoId)
+
   const [tab, setTab] = useState('lista')
-  const [lista, setLista] = useState(() => {
-    const saved = localStorage.getItem('mercadito_lista')
-    return saved ? JSON.parse(saved) : []
-  })
-  const [historial, setHistorial] = useState(() => {
-    const saved = localStorage.getItem('mercadito_historial')
-    return saved ? JSON.parse(saved) : []
-  })
   const [sullyOpen, setSullyOpen] = useState(false)
   const [sullyMensaje, setSullyMensaje] = useState(null)
-  const [userName, setUserName] = useState(() => {
-    return localStorage.getItem('mercadito_nombre') || ''
-  })
+  const [userName, setUserName] = useState('')
 
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('mercadito_theme')
@@ -43,25 +39,35 @@ export default function App() {
   }, [darkMode])
 
   useEffect(() => {
-    localStorage.setItem('mercadito_lista', JSON.stringify(lista))
-  }, [lista])
-
-  useEffect(() => {
-    localStorage.setItem('mercadito_historial', JSON.stringify(historial))
-  }, [historial])
+    if (userDoc?.nombre) {
+      const primerNombre = userDoc.nombre.split(' ')[0]
+      setUserName(primerNombre)
+      localStorage.setItem('mercadito_nombre', primerNombre)
+    }
+  }, [userDoc])
 
   useEffect(() => {
     const hoy = new Date()
     const esViernes = hoy.getDay() === 5
     const yaVio = localStorage.getItem('mercadito_viernes_' + hoy.toDateString())
-    if (esViernes && !yaVio) {
+    if (esViernes && !yaVio && grupoId) {
       setTimeout(() => {
         setSullyMensaje('viernes')
         setSullyOpen(true)
         localStorage.setItem('mercadito_viernes_' + hoy.toDateString(), '1')
       }, 2000)
     }
-  }, [])
+  }, [grupoId])
+
+  const setLista = (fn) => {
+    const nueva = typeof fn === 'function' ? fn(lista) : fn
+    actualizarLista(nueva)
+  }
+
+  const setHistorial = (fn) => {
+    const nuevo = typeof fn === 'function' ? fn(historial) : fn
+    actualizarHistorial(nuevo)
+  }
 
   const agregarItem = (item) => {
     setLista(prev => {
@@ -92,117 +98,105 @@ export default function App() {
     setSullyOpen(true)
   }
 
-  const handleOnboardingComplete = (nombre) => {
-    localStorage.setItem('mercadito_nombre', nombre)
-    setUserName(nombre)
+  // Loading
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#d4c9b8' }}>
+        <div style={{ fontFamily: 'cursive', fontSize: '24px', color: '#5b8dd9' }}>Cargando...</div>
+      </div>
+    )
   }
 
-  if (!userName) {
-    return <Onboarding onComplete={handleOnboardingComplete} />
+  // Sin login o sin pareja
+  if (!user || !grupoId) {
+    return <Login />
+  }
+
+  // Onboarding nombre (solo si no tiene)
+  const nombreGuardado = localStorage.getItem('mercadito_nombre')
+  if (!nombreGuardado) {
+    return <Onboarding onComplete={(n) => {
+      localStorage.setItem('mercadito_nombre', n)
+      setUserName(n)
+    }} />
   }
 
   return (
     <div className="app-container">
-
       <aside className="sidebar">
         <div className="sidebar-top">
           <div className="sidebar-logo">
             <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
             <span className="logo-text">Mercadito</span>
           </div>
-
-          {/* TOGGLE DÍA/NOCHE */}
           <div className="toggle">
-            <input
-              className="toggle-input"
-              type="checkbox"
-              checked={darkMode}
-              onChange={() => setDarkMode(p => !p)}
-            />
+            <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
             <div className="toggle-bg"></div>
             <div className="toggle-switch">
               <div className="toggle-switch-figure"></div>
               <div className="toggle-switch-figureAlt"></div>
             </div>
           </div>
-
         </div>
 
         <nav className="sidebar-nav">
           {NAV_ITEMS.map(item => (
-            <button
-              key={item.id}
-              className={`nav-btn ${tab === item.id ? 'active' : ''}`}
-              onClick={() => setTab(item.id)}
-            >
+            <button key={item.id} className={`nav-btn ${tab === item.id ? 'active' : ''}`} onClick={() => setTab(item.id)}>
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
             </button>
           ))}
         </nav>
+
+        {/* Info pareja */}
+        {parejaDoc && (
+          <div className="sidebar-pareja">
+            <img src={parejaDoc.foto} alt={parejaDoc.nombre} className="pareja-avatar" />
+            <div>
+              <div className="pareja-nombre">{parejaDoc.nombre?.split(' ')[0]}</div>
+              <div className="pareja-label">tu pareja</div>
+            </div>
+            {syncing && <div className="sync-dot" title="Sincronizando..." />}
+          </div>
+        )}
+
+        <button className="btn-logout" onClick={logout}>
+          <LogOut size={14} />
+          Cerrar sesión
+        </button>
       </aside>
 
       <main className="app-main">
         <div className="notebook-lines">
-          {tab === 'lista' && (
-            <ListaActiva
-              lista={lista}
-              setLista={setLista}
-              onFinalizar={finalizarCompra}
-              historial={historial}
-              onRepetir={repetirCompra}
-            />
-          )}
-          {tab === 'catalogo' && (
-            <Catalogo onAgregar={agregarItem} listaActual={lista} />
-          )}
-          {tab === 'historial' && (
-            <Historial historial={historial} onRepetir={repetirCompra} />
-          )}
-          {tab === 'stats' && (
-            <Estadisticas historial={historial} lista={lista} />
-          )}
+          {tab === 'lista' && <ListaActiva lista={lista} setLista={setLista} onFinalizar={finalizarCompra} historial={historial} onRepetir={repetirCompra} />}
+          {tab === 'catalogo' && <Catalogo onAgregar={agregarItem} listaActual={lista} />}
+          {tab === 'historial' && <Historial historial={historial} onRepetir={repetirCompra} />}
+          {tab === 'stats' && <Estadisticas historial={historial} lista={lista} />}
         </div>
       </main>
 
       <nav className="mobile-nav">
         {NAV_ITEMS.map(item => (
-          <button
-            key={item.id}
-            className={`mobile-nav-btn ${tab === item.id ? 'active' : ''}`}
-            onClick={() => setTab(item.id)}
-          >
+          <button key={item.id} className={`mobile-nav-btn ${tab === item.id ? 'active' : ''}`} onClick={() => setTab(item.id)}>
             <span className="mobile-nav-icon">{item.icon}</span>
             <span>{item.label}</span>
           </button>
         ))}
-        
         <div className="toggle">
-          <input
-            className="toggle-input"
-            type="checkbox"
-            checked={darkMode}
-            onChange={() => setDarkMode(p => !p)}
-          />
+          <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
           <div className="toggle-bg"></div>
           <div className="toggle-switch">
             <div className="toggle-switch-figure"></div>
             <div className="toggle-switch-figureAlt"></div>
           </div>
         </div>
-        
       </nav>
 
       <Sully
-        open={sullyOpen}
-        setOpen={setSullyOpen}
-        mensajeInicial={sullyMensaje}
-        setMensajeInicial={setSullyMensaje}
-        historial={historial}
-        lista={lista}
-        onRepetirUltima={() => {
-          if (historial.length > 0) repetirCompra(historial[0])
-        }}
+        open={sullyOpen} setOpen={setSullyOpen}
+        mensajeInicial={sullyMensaje} setMensajeInicial={setSullyMensaje}
+        historial={historial} lista={lista}
+        onRepetirUltima={() => { if (historial.length > 0) repetirCompra(historial[0]) }}
         onAgregarItem={(item) => setLista(prev => {
           const existe = prev.find(i => i.nombre.toLowerCase() === item.nombre.toLowerCase())
           if (existe) return prev

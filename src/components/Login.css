@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Patrick+Hand&display=swap');
+
+.login-bg {
+  min-height: 100vh;
+  background-color: #d4c9b8;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg transform='translate(10,15) rotate(-15 12 14)' opacity='0.55'%3E%3Cellipse cx='12' cy='16' rx='9' ry='10' fill='%23e05252'/%3E%3Cpath d='M12 6 Q15 1 19 3' stroke='%234a8c3f' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/g%3E%3Cg transform='translate(70,5) rotate(10 12 14)' opacity='0.5'%3E%3Cpath d='M2 4h4l4 12h12l3-9H8' stroke='%235b8dd9' stroke-width='2.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='10' cy='19' r='2.5' fill='%235b8dd9'/%3E%3Ccircle cx='19' cy='19' r='2.5' fill='%235b8dd9'/%3E%3C/g%3E%3Cg transform='translate(140,20) rotate(20 12 16)' opacity='0.55'%3E%3Cellipse cx='12' cy='18' rx='5' ry='10' fill='%23e8734a'/%3E%3C/g%3E%3Cg transform='translate(30,75) rotate(-30 14 12)' opacity='0.55'%3E%3Cpath d='M4 18 Q8 4 20 4 Q22 4 22 8 Q22 12 12 16 Q6 18 4 18Z' fill='%23f5c842'/%3E%3C/g%3E%3Cg transform='translate(100,65) rotate(5 12 16)' opacity='0.5'%3E%3Cpath d='M4 12 Q4 6 12 6 Q20 6 20 12 L22 28 Q22 30 20 30 H4 Q2 30 2 28 Z' fill='%234caf7d'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Patrick Hand', cursive;
+}
+
+.login-sheet {
+  background: #fdf9f0;
+  background-image: linear-gradient(#c8d8f0 1px, transparent 1px);
+  background-size: 100% 36px;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  width: 100%;
+  max-width: 420px;
+  min-height: 500px;
+  padding: 40px 32px 32px 60px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: sheetIn 0.4s ease-out;
+}
+
+@keyframes sheetIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.login-sheet::before {
+  content: '';
+  position: absolute;
+  left: 48px; top: 0; bottom: 0;
+  width: 2px;
+  background: #e8a0a0;
+}
+
+.login-sheet::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 44px;
+  background: #f7f2e4;
+  border-right: 1px dashed #bbb;
+  border-radius: 20px 0 0 20px;
+}
+
+.login-content {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.login-centered {
+  align-items: center;
+  text-align: center;
+}
+
+.login-sully {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.login-sully-sm {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.login-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid #5b8dd9;
+}
+
+.login-title {
+  font-family: 'Caveat', cursive;
+  font-size: 26px;
+  font-weight: 700;
+  color: #5b8dd9;
+  margin: 0;
+}
+
+.login-desc {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 15px;
+  color: #4a3f5c;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.login-btn-google {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px;
+  background: white;
+  color: #333;
+  border: 2px solid #ddd;
+  border-radius: 24px;
+  padding: 10px 24px;
+  cursor: pointer;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+  transition: all 0.15s;
+  width: 100%;
+  justify-content: center;
+}
+.login-btn-google:hover { box-shadow: 3px 3px 12px rgba(0,0,0,0.15); transform: translateY(-1px); }
+.login-btn-google:disabled { opacity: 0.6; cursor: default; }
+
+.login-btn-primary {
+  font-family: 'Caveat', cursive;
+  font-size: 18px;
+  font-weight: 700;
+  background: #5b8dd9;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 28px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.12);
+  transition: all 0.15s;
+  width: 100%;
+}
+.login-btn-primary:hover { transform: translateY(-1px); box-shadow: 4px 4px 0 rgba(0,0,0,0.15); }
+.login-btn-primary:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+.login-btn-text {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 14px;
+  background: none;
+  border: none;
+  color: #7a6f8c;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 4px;
+}
+.login-btn-text:hover { color: #4a3f5c; }
+
+.login-input {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 16px;
+  border: none;
+  border-bottom: 2px solid #5b8dd9;
+  background: transparent;
+  padding: 8px 4px;
+  width: 100%;
+  color: #2c2035;
+  outline: none;
+  text-align: center;
+}
+.login-input::placeholder { color: #b0a8c0; }
+
+.login-msg {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 14px;
+  color: #4caf7d;
+  margin: 0;
+  background: #e8f5e9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.login-opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.login-o {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 13px;
+  color: #7a6f8c;
+  margin: 0;
+}
+
+.login-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #c8d8f0;
+  border-top-color: #5b8dd9;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -1091,3 +1091,68 @@ body {
 
 
 
+/* PAREJA EN SIDEBAR */
+.sidebar-pareja {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--paper2);
+  border-radius: 12px;
+  margin-top: auto;
+  margin-bottom: 8px;
+}
+
+.pareja-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+}
+
+.pareja-nombre {
+  font-family: var(--font-hand);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.pareja-label {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent3);
+  margin-left: auto;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.btn-logout {
+  font-family: var(--font-hand);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink3);
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.15s;
+  width: 100%;
+}
+.btn-logout:hover {
+  background: var(--paper2);
+  color: #e05252;
+}

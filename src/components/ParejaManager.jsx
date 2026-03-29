@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { doc, updateDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '../firebase'
 
 export default function ParejaManager({ onClose }) {
-  const { user, userDoc, parejaDoc, grupoId, setGrupoId } = useAuth()
+  const { user, parejaDoc, grupoId, invitarPareja, desvincularPareja } = useAuth()
   const [emailPareja, setEmailPareja] = useState('')
   const [msg, setMsg] = useState('')
-  const [msgTipo, setMsgTipo] = useState('ok') // ok | error
+  const [msgTipo, setMsgTipo] = useState('ok')
   const [cargando, setCargando] = useState(false)
   const [confirmDesvinc, setConfirmDesvinc] = useState(false)
 
@@ -24,49 +22,22 @@ export default function ParejaManager({ onClose }) {
       return
     }
     setCargando(true)
-    try {
-      const invRef = doc(db, 'invitaciones', `${user.uid}_${emailPareja.trim()}`)
-      await import('firebase/firestore').then(({ setDoc }) =>
-        setDoc(invRef, {
-          de: user.uid,
-          deEmail: user.email,
-          deNombre: user.displayName || user.email,
-          para: emailPareja.trim(),
-          estado: 'pendiente',
-          creadaEn: new Date().toISOString()
-        })
-      )
+    const res = await invitarPareja(emailPareja.trim())
+    setCargando(false)
+    if (res?.error) {
+      mostrarMsg(res.error, 'error')
+    } else {
       mostrarMsg('¡Invitación enviada! Que entre a la app y la acepte.')
       setEmailPareja('')
-    } catch (e) {
-      mostrarMsg('Error al enviar la invitación', 'error')
-    } finally {
-      setCargando(false)
     }
   }
 
-  const desvincular = async () => {
-    if (!grupoId) return
+  const handleDesvincular = async () => {
     setCargando(true)
-    try {
-      // Quitar grupoId a ambos usuarios
-      await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: null })
-      if (parejaDoc?.uid) {
-        await updateDoc(doc(db, 'usuarios', parejaDoc.uid), { grupoId: null })
-      }
-      // Borrar invitaciones relacionadas
-      const q = query(collection(db, 'invitaciones'), where('de', '==', user.uid))
-      const snap = await getDocs(q)
-      snap.forEach(d => deleteDoc(d.ref))
-
-      mostrarMsg('Desvinculados correctamente')
-      setConfirmDesvinc(false)
-      window.location.reload()
-    } catch (e) {
-      mostrarMsg('Error al desvincular', 'error')
-    } finally {
-      setCargando(false)
-    }
+    await desvincularPareja()
+    setCargando(false)
+    localStorage.removeItem('mercadito_solo')
+    window.location.reload()
   }
 
   return (
@@ -94,7 +65,6 @@ export default function ParejaManager({ onClose }) {
           👫 Mi pareja
         </h2>
 
-        {/* TIENE PAREJA */}
         {parejaDoc ? (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', background: 'var(--paper2)', borderRadius: '12px', padding: '12px' }}>
@@ -104,7 +74,6 @@ export default function ParejaManager({ onClose }) {
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--ink3)' }}>{parejaDoc.email}</div>
               </div>
             </div>
-
             {!confirmDesvinc ? (
               <button className="btn-danger" style={{ width: '100%' }} onClick={() => setConfirmDesvinc(true)}>
                 Desvincular pareja
@@ -115,7 +84,7 @@ export default function ParejaManager({ onClose }) {
                   ¿Seguro? Los dos van a perder acceso al grupo compartido.
                 </p>
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  <button className="btn-danger" onClick={desvincular} disabled={cargando} style={{ flex: 1 }}>
+                  <button className="btn-danger" onClick={handleDesvincular} disabled={cargando} style={{ flex: 1 }}>
                     {cargando ? 'Desvinculando...' : 'Sí, desvincular'}
                   </button>
                   <button className="btn-secondary" onClick={() => setConfirmDesvinc(false)} style={{ flex: 1 }}>
@@ -126,10 +95,9 @@ export default function ParejaManager({ onClose }) {
             )}
           </div>
         ) : (
-          /* SIN PAREJA */
           <div>
             <p style={{ fontFamily: 'var(--font-hand)', fontSize: '15px', color: 'var(--ink2)', marginBottom: '16px' }}>
-              Invitá a tu pareja con su email de Google. Cuando entre a la app va a ver la invitación.
+              Invitá a tu pareja con su email de Google. Cuando entre a la app va a ver la invitación automáticamente.
             </p>
             <input
               className="input-buscar"
@@ -138,7 +106,7 @@ export default function ParejaManager({ onClose }) {
               value={emailPareja}
               onChange={e => setEmailPareja(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && invitar()}
-              style={{ marginBottom: '12px', display: 'block', width: '100%' }}
+              style={{ marginBottom: '12px', display: 'block', width: '100%', fontSize: '16px' }}
             />
             <button className="btn-primary" onClick={invitar} disabled={cargando || !emailPareja.trim()} style={{ width: '100%' }}>
               {cargando ? 'Enviando...' : 'Enviar invitación'}
@@ -151,7 +119,7 @@ export default function ParejaManager({ onClose }) {
             fontFamily: 'var(--font-hand)', fontSize: '14px',
             color: msgTipo === 'ok' ? 'var(--accent3)' : '#e05252',
             background: msgTipo === 'ok' ? '#e8f5e9' : '#fce4e4',
-            padding: '8px 12px', borderRadius: '8px', marginTop: '12px'
+            padding: '8px 12px', borderRadius: '8px', marginTop: '12px', margin: '12px 0 0'
           }}>
             {msg}
           </p>

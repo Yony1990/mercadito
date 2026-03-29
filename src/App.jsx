@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag, LogOut } from 'lucide-react'
+import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag, LogOut, Users } from 'lucide-react'
 import ListaActiva from './components/ListaActiva'
 import Catalogo from './components/Catalogo'
 import Historial from './components/Historial'
@@ -7,9 +7,9 @@ import Estadisticas from './components/Estadisticas'
 import Sully from './components/Sully'
 import Onboarding from './components/Onboarding'
 import Login from './components/Login'
+import ParejaManager from './components/ParejaManager'
 import { useAuth } from './context/AuthContext'
 import { useGrupoData } from './hooks/useGrupoData'
-import ParejaManager from './components/ParejaManager'
 import './App.css'
 
 const NAV_ITEMS = [
@@ -21,14 +21,53 @@ const NAV_ITEMS = [
 
 export default function App() {
   const { user, userDoc, parejaDoc, grupoId, loading, logout } = useAuth()
-  const { lista, historial, actualizarLista, actualizarHistorial, syncing } = useGrupoData(grupoId)
+  const { lista: listaFirestore, historial: historialFirestore, actualizarLista, actualizarHistorial, syncing } = useGrupoData(grupoId)
 
   const [mostrarParejaManager, setMostrarParejaManager] = useState(false)
-
   const [tab, setTab] = useState('lista')
   const [sullyOpen, setSullyOpen] = useState(false)
   const [sullyMensaje, setSullyMensaje] = useState(null)
   const [userName, setUserName] = useState('')
+
+  // Lista local para cuando no hay grupo
+  const [listaLocal, setListaLocal] = useState(() => {
+    const s = localStorage.getItem('mercadito_lista')
+    return s ? JSON.parse(s) : []
+  })
+  const [historialLocal, setHistorialLocal] = useState(() => {
+    const s = localStorage.getItem('mercadito_historial')
+    return s ? JSON.parse(s) : []
+  })
+
+  useEffect(() => {
+    if (!grupoId) localStorage.setItem('mercadito_lista', JSON.stringify(listaLocal))
+  }, [listaLocal, grupoId])
+
+  useEffect(() => {
+    if (!grupoId) localStorage.setItem('mercadito_historial', JSON.stringify(historialLocal))
+  }, [historialLocal, grupoId])
+
+  // Usar datos de Firestore si hay grupo, sino local
+  const lista = grupoId ? listaFirestore : listaLocal
+  const historial = grupoId ? historialFirestore : historialLocal
+
+  const setLista = (fn) => {
+    if (grupoId) {
+      const nueva = typeof fn === 'function' ? fn(lista) : fn
+      actualizarLista(nueva)
+    } else {
+      setListaLocal(fn)
+    }
+  }
+
+  const setHistorial = (fn) => {
+    if (grupoId) {
+      const nuevo = typeof fn === 'function' ? fn(historial) : fn
+      actualizarHistorial(nuevo)
+    } else {
+      setHistorialLocal(fn)
+    }
+  }
 
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('mercadito_theme')
@@ -53,24 +92,14 @@ export default function App() {
     const hoy = new Date()
     const esViernes = hoy.getDay() === 5
     const yaVio = localStorage.getItem('mercadito_viernes_' + hoy.toDateString())
-    if (esViernes && !yaVio && grupoId) {
+    if (esViernes && !yaVio) {
       setTimeout(() => {
         setSullyMensaje('viernes')
         setSullyOpen(true)
         localStorage.setItem('mercadito_viernes_' + hoy.toDateString(), '1')
       }, 2000)
     }
-  }, [grupoId])
-
-  const setLista = (fn) => {
-    const nueva = typeof fn === 'function' ? fn(lista) : fn
-    actualizarLista(nueva)
-  }
-
-  const setHistorial = (fn) => {
-    const nuevo = typeof fn === 'function' ? fn(historial) : fn
-    actualizarHistorial(nuevo)
-  }
+  }, [])
 
   const agregarItem = (item) => {
     setLista(prev => {
@@ -101,7 +130,6 @@ export default function App() {
     setSullyOpen(true)
   }
 
-  // Loading
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#d4c9b8' }}>
@@ -110,17 +138,20 @@ export default function App() {
     )
   }
 
-  // Sin login o sin pareja
-  if (!user || !grupoId) {
-    return <Login />
-  }
+  // Sin login → Login
+  if (!user) return <Login />
 
-  // Onboarding nombre (solo si no tiene)
+  // Logueado sin grupo y sin flag de "continuar solo" → Login
+  const continuarSolo = localStorage.getItem('mercadito_solo')
+  if (!grupoId && !continuarSolo) return <Login />
+
+  // Sin nombre guardado → Onboarding
   const nombreGuardado = localStorage.getItem('mercadito_nombre')
   if (!nombreGuardado) {
     return <Onboarding onComplete={(n) => {
       localStorage.setItem('mercadito_nombre', n)
       setUserName(n)
+      window.location.reload()
     }} />
   }
 
@@ -151,17 +182,7 @@ export default function App() {
           ))}
         </nav>
 
-        {/* Info pareja */}
-        {/* {parejaDoc && (
-          <div className="sidebar-pareja">
-            <img src={parejaDoc.foto} alt={parejaDoc.nombre} className="pareja-avatar" />
-            <div>
-              <div className="pareja-nombre">{parejaDoc.nombre?.split(' ')[0]}</div>
-              <div className="pareja-label">tu pareja</div>
-            </div>
-            {syncing && <div className="sync-dot" title="Sincronizando..." />}
-          </div>
-        )} */}
+        {/* Pareja */}
         {parejaDoc ? (
           <div className="sidebar-pareja" onClick={() => setMostrarParejaManager(true)} style={{ cursor: 'pointer' }}>
             <img src={parejaDoc.foto} alt={parejaDoc.nombre} className="pareja-avatar" />
@@ -172,12 +193,11 @@ export default function App() {
             {syncing && <div className="sync-dot" />}
           </div>
         ) : (
-          <button className="btn-secondary" style={{ marginTop: 'auto', fontSize: '14px' }} onClick={() => setMostrarParejaManager(true)}>
-            + Invitar pareja
+          <button className="nav-btn" style={{ marginTop: 'auto' }} onClick={() => setMostrarParejaManager(true)}>
+            <span className="nav-icon"><Users size={18} /></span>
+            <span className="nav-label">Invitar pareja</span>
           </button>
         )}
-
-        {mostrarParejaManager && <ParejaManager onClose={() => setMostrarParejaManager(false)} />}
 
         <button className="btn-logout" onClick={logout}>
           <LogOut size={14} />
@@ -201,6 +221,15 @@ export default function App() {
             <span>{item.label}</span>
           </button>
         ))}
+        <button className="mobile-nav-btn" onClick={() => setMostrarParejaManager(true)}>
+          <span className="mobile-nav-icon">
+            {parejaDoc
+              ? <img src={parejaDoc.foto} style={{ width: 20, height: 20, borderRadius: '50%' }} />
+              : <Users size={18} />
+            }
+          </span>
+          <span>{parejaDoc ? parejaDoc.nombre?.split(' ')[0] : 'Pareja'}</span>
+        </button>
         <div className="toggle">
           <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
           <div className="toggle-bg"></div>
@@ -210,6 +239,8 @@ export default function App() {
           </div>
         </div>
       </nav>
+
+      {mostrarParejaManager && <ParejaManager onClose={() => setMostrarParejaManager(false)} />}
 
       <Sully
         open={sullyOpen} setOpen={setSullyOpen}

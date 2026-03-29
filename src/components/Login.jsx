@@ -1,39 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { collection, query, where, getDocs, onSnapshot } from 'firebase/firestore'
-import { db } from '../firebase'
 import sullyImg from '../assets/sully.png'
 import './Login.css'
 
 export default function Login() {
-  const { user, userDoc, grupoId, loginConGoogle, logout, invitarPareja, aceptarInvitacion } = useAuth()
-  const [vista, setVista] = useState('login') // login | espera | invitar | pendiente
+  const { user, grupoId, invPendiente, loginConGoogle, logout, invitarPareja, aceptarInvitacion } = useAuth()
   const [emailPareja, setEmailPareja] = useState('')
-  const [invPendiente, setInvPendiente] = useState(null)
+  const [vista, setVista] = useState('inicio') // inicio | invitar | pendiente
   const [msg, setMsg] = useState('')
   const [cargando, setCargando] = useState(false)
-
-  // Si ya tiene grupo, no debería estar acá
-  useEffect(() => {
-    if (grupoId) return
-
-    if (user) {
-      setVista('espera')
-      // Escuchar invitaciones pendientes para este usuario
-      const q = query(
-        collection(db, 'invitaciones'),
-        where('para', '==', user.email),
-        where('estado', '==', 'pendiente')
-      )
-      const unsub = onSnapshot(q, (snap) => {
-        if (!snap.empty) {
-          setInvPendiente(snap.docs[0].data())
-          setVista('invitacion_recibida')
-        }
-      })
-      return unsub
-    }
-  }, [user, grupoId])
 
   const handleLogin = async () => {
     setCargando(true)
@@ -51,10 +26,10 @@ export default function Login() {
     setCargando(true)
     const res = await invitarPareja(emailPareja.trim())
     setCargando(false)
-    if (res.error) {
+    if (res?.error) {
       setMsg(res.error)
     } else {
-      setMsg('¡Invitación enviada! Esperá que tu pareja inicie sesión y acepte.')
+      setMsg('¡Invitación enviada! Que entre a la app y la acepte.')
       setVista('pendiente')
     }
   }
@@ -65,11 +40,17 @@ export default function Login() {
     setCargando(false)
   }
 
+  const handleContinuarSolo = () => {
+    // Guardar flag para entrar sin pareja
+    localStorage.setItem('mercadito_solo', '1')
+    window.location.reload()
+  }
+
   return (
     <div className="login-bg">
       <div className="login-sheet">
 
-        {/* LOGIN INICIAL */}
+        {/* SIN LOGIN */}
         {!user && (
           <div className="login-content">
             <img src={sullyImg} alt="Sully" className="login-sully" />
@@ -87,24 +68,45 @@ export default function Login() {
           </div>
         )}
 
-        {/* USUARIO LOGUEADO SIN PAREJA */}
-        {user && vista === 'espera' && (
+        {/* LOGUEADO — INVITACIÓN RECIBIDA */}
+        {user && invPendiente && (
+          <div className="login-content login-centered">
+            <img src={sullyImg} alt="Sully" className="login-sully" />
+            <h2 className="login-title">¡Te invitaron! 🎉</h2>
+            <p className="login-desc">
+              <strong>{invPendiente.deNombre}</strong> te invita a compartir su Mercadito
+            </p>
+            <button className="login-btn-primary" onClick={handleAceptar} disabled={cargando}>
+              {cargando ? 'Conectando...' : '¡Aceptar y entrar!'}
+            </button>
+            <button className="login-btn-text" onClick={handleContinuarSolo}>
+              Entrar sin conectar
+            </button>
+            <button className="login-btn-text" onClick={logout}>Cerrar sesión</button>
+          </div>
+        )}
+
+        {/* LOGUEADO SIN INVITACIÓN — INICIO */}
+        {user && !invPendiente && vista === 'inicio' && (
           <div className="login-content">
             <img src={user.photoURL} alt={user.displayName} className="login-avatar" />
             <h2 className="login-title">Hola, {user.displayName?.split(' ')[0]}!</h2>
-            <p className="login-desc">Para usar Mercadito necesitás conectarte con tu pareja</p>
+            <p className="login-desc">¿Querés conectarte con tu pareja para compartir la lista?</p>
             <div className="login-opciones">
               <button className="login-btn-primary" onClick={() => setVista('invitar')}>
                 Invitar a mi pareja
               </button>
-              <p className="login-o">o esperá a que te inviten</p>
+              <p className="login-o">o</p>
+              <button className="login-btn-secondary" onClick={handleContinuarSolo}>
+                Continuar sin pareja
+              </button>
             </div>
             <button className="login-btn-text" onClick={logout}>Cerrar sesión</button>
           </div>
         )}
 
-        {/* INVITAR PAREJA */}
-        {user && vista === 'invitar' && (
+        {/* INVITAR */}
+        {user && !invPendiente && vista === 'invitar' && (
           <div className="login-content">
             <img src={sullyImg} alt="Sully" className="login-sully-sm" />
             <h2 className="login-title">Invitá a tu pareja</h2>
@@ -121,33 +123,21 @@ export default function Login() {
             <button className="login-btn-primary" onClick={handleInvitar} disabled={cargando || !emailPareja.trim()}>
               {cargando ? 'Enviando...' : 'Enviar invitación'}
             </button>
-            <button className="login-btn-text" onClick={() => setVista('espera')}>← Volver</button>
+            <button className="login-btn-text" onClick={() => setVista('inicio')}>← Volver</button>
           </div>
         )}
 
-        {/* ESPERANDO ACEPTACIÓN */}
-        {user && vista === 'pendiente' && (
+        {/* ESPERANDO */}
+        {user && !invPendiente && vista === 'pendiente' && (
           <div className="login-content login-centered">
             <div className="login-spinner" />
             <h2 className="login-title">Esperando a tu pareja...</h2>
-            <p className="login-desc">Le enviamos una invitación a <strong>{emailPareja}</strong>. Cuando inicie sesión y la acepte, ¡ya pueden empezar!</p>
+            <p className="login-desc">Cuando entre a la app va a ver tu invitación automáticamente.</p>
+            <button className="login-btn-secondary" onClick={handleContinuarSolo}>
+              Entrar sin esperar
+            </button>
             <button className="login-btn-text" onClick={() => setVista('invitar')}>Cambiar email</button>
             <button className="login-btn-text" onClick={logout}>Cerrar sesión</button>
-          </div>
-        )}
-
-        {/* INVITACIÓN RECIBIDA */}
-        {user && vista === 'invitacion_recibida' && invPendiente && (
-          <div className="login-content login-centered">
-            <img src={sullyImg} alt="Sully" className="login-sully" />
-            <h2 className="login-title">¡Te invitaron!</h2>
-            <p className="login-desc">
-              <strong>{invPendiente.deNombre}</strong> ({invPendiente.deEmail}) te invita a compartir su Mercadito
-            </p>
-            <button className="login-btn-primary" onClick={handleAceptar} disabled={cargando}>
-              {cargando ? 'Conectando...' : '¡Aceptar y entrar!'}
-            </button>
-            <button className="login-btn-text" onClick={logout}>Rechazar</button>
           </div>
         )}
 

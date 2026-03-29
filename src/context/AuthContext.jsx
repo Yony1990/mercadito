@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
-import { doc, getDoc, setDoc, collection, query, where, getDocs, onSnapshot, updateDoc, arrayUnion } from 'firebase/firestore'
+import { doc, getDoc, setDoc, collection, query, where, getDocs, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore'
 import { auth, googleProvider, db } from '../firebase'
 
 const AuthContext = createContext()
@@ -11,6 +11,7 @@ export function AuthProvider({ children }) {
   const [parejaDoc, setParejaDoc] = useState(null)
   const [grupoId, setGrupoId] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [invPendiente, setInvPendiente] = useState(null)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -22,11 +23,30 @@ export function AuthProvider({ children }) {
         setUserDoc(null)
         setParejaDoc(null)
         setGrupoId(null)
+        setInvPendiente(null)
       }
       setLoading(false)
     })
     return unsub
   }, [])
+
+  // Escuchar invitaciones en tiempo real cuando el usuario está logueado sin grupo
+  useEffect(() => {
+    if (!user || grupoId) return
+    const q = query(
+      collection(db, 'invitaciones'),
+      where('para', '==', user.email),
+      where('estado', '==', 'pendiente')
+    )
+    const unsub = onSnapshot(q, (snap) => {
+      if (!snap.empty) {
+        setInvPendiente(snap.docs[0].data())
+      } else {
+        setInvPendiente(null)
+      }
+    })
+    return unsub
+  }, [user, grupoId])
 
   const cargarUsuario = async (firebaseUser) => {
     const ref = doc(db, 'usuarios', firebaseUser.uid)
@@ -77,55 +97,77 @@ export function AuthProvider({ children }) {
   const invitarPareja = async (emailPareja) => {
     if (!user) return { error: 'No autenticado' }
     if (emailPareja === user.email) return { error: 'No podés invitarte a vos mismo' }
-
-    // Buscar si la pareja ya existe como usuario
-    const q = query(collection(db, 'usuarios'), where('email', '==', emailPareja))
-    const snap = await getDocs(q)
-
-    // Crear o actualizar invitación
-    const invRef = doc(db, 'invitaciones', `${user.uid}_${emailPareja}`)
-    await setDoc(invRef, {
-      de: user.uid,
-      deEmail: user.email,
-      deNombre: user.displayName || user.email,
-      para: emailPareja,
-      estado: 'pendiente',
-      creadaEn: new Date().toISOString()
-    })
-
-    return { ok: true, usuarioExiste: !snap.empty }
+    try {
+      const invRef = doc(db, 'invitaciones', `${user.uid}_${emailPareja}`)
+      await setDoc(invRef, {
+        de: user.uid,
+        deEmail: user.email,
+        deNombre: user.displayName || user.email,
+        para: emailPareja,
+        estado: 'pendiente',
+        creadaEn: new Date().toISOString()
+      })
+      return { ok: true }
+    } catch (e) {
+      return { error: 'Error al enviar invitación' }
+    }
   }
 
   const aceptarInvitacion = async (invitacion) => {
     if (!user) return
+    try {
+      const grupoRef = doc(collection(db, 'grupos'))
+      await setDoc(grupoRef, {
+        miembros: [invitacion.de, user.uid],
+        creadoEn: new Date().toISOString(),
+        lista: [],
+        historial: []
+      })
+      await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: grupoRef.id })
+      await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoRef.id })
 
-    // Crear grupo
-    const grupoRef = doc(collection(db, 'grupos'))
-    await setDoc(grupoRef, {
-      miembros: [invitacion.de, user.uid],
-      creadoEn: new Date().toISOString(),
-      lista: [],
-      historial: []
-    })
+      // Marcar invitación como aceptada
+      const invId = `${invitacion.de}_${user.email}`
+      try {
+        await updateDoc(doc(db, 'invitaciones', invId), { estado: 'aceptada' })
+      } catch (e) {
+        // Si no existe el doc exacto, no importa
+      }
 
-    // Actualizar ambos usuarios con grupoId
-    await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: grupoRef.id })
-    await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoRef.id })
+      setGrupoId(grupoRef.id)
+      setUserDoc(prev => ({ ...prev, grupoId: grupoRef.id }))
+      setInvPendiente(null)
+      await cargarPareja(user.uid, grupoRef.id)
+    } catch (e) {
+      console.error('Error aceptando invitación:', e)
+    }
+  }
 
-    // Marcar invitación como aceptada
-    const invId = `${invitacion.de}_${user.email}`
-    await updateDoc(doc(db, 'invitaciones', invId), { estado: 'aceptada' })
+  const desvincularPareja = async () => {
+    if (!user || !grupoId) return
+    try {
+      await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: null })
+      if (parejaDoc?.uid) {
+        await updateDoc(doc(db, 'usuarios', parejaDoc.uid), { grupoId: null })
+      }
+      // Borrar invitaciones
+      const q = query(collection(db, 'invitaciones'), where('de', '==', user.uid))
+      const snap = await getDocs(q)
+      snap.forEach(d => deleteDoc(d.ref))
 
-    // Actualizar estado local directamente sin esperar onAuthStateChanged
-    setGrupoId(grupoRef.id)
-    setUserDoc(prev => ({ ...prev, grupoId: grupoRef.id }))
-    await cargarPareja(user.uid, grupoRef.id)
+      setGrupoId(null)
+      setParejaDoc(null)
+      setUserDoc(prev => ({ ...prev, grupoId: null }))
+    } catch (e) {
+      console.error('Error desvinculando:', e)
+    }
   }
 
   return (
     <AuthContext.Provider value={{
-      user, userDoc, parejaDoc, grupoId, loading,
-      loginConGoogle, logout, invitarPareja, aceptarInvitacion
+      user, userDoc, parejaDoc, grupoId, loading, invPendiente,
+      loginConGoogle, logout, invitarPareja, aceptarInvitacion, desvincularPareja,
+      setGrupoId, setParejaDoc
     }}>
       {children}
     </AuthContext.Provider>

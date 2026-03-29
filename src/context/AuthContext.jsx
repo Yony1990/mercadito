@@ -113,13 +113,13 @@ export function AuthProvider({ children }) {
     await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoRef.id })
 
     // Marcar invitación como aceptada
-    await updateDoc(doc(db, 'invitaciones', `${invitacion.de}_${user.email}`), {
-      estado: 'aceptada'
-    })
+    const invId = `${invitacion.de}_${user.email}`
+    await updateDoc(doc(db, 'invitaciones', invId), { estado: 'aceptada' })
 
+    // Actualizar estado local directamente sin esperar onAuthStateChanged
     setGrupoId(grupoRef.id)
+    setUserDoc(prev => ({ ...prev, grupoId: grupoRef.id }))
     await cargarPareja(user.uid, grupoRef.id)
-    await cargarUsuario(user)
   }
 
   return (

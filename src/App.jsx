@@ -9,6 +9,7 @@ import Onboarding from './components/Onboarding'
 import Login from './components/Login'
 import { useAuth } from './context/AuthContext'
 import { useGrupoData } from './hooks/useGrupoData'
+import ParejaManager from './components/ParejaManager'
 import './App.css'
 
 const NAV_ITEMS = [
@@ -21,6 +22,8 @@ const NAV_ITEMS = [
 export default function App() {
   const { user, userDoc, parejaDoc, grupoId, loading, logout } = useAuth()
   const { lista, historial, actualizarLista, actualizarHistorial, syncing } = useGrupoData(grupoId)
+
+  const [mostrarParejaManager, setMostrarParejaManager] = useState(false)
 
   const [tab, setTab] = useState('lista')
   const [sullyOpen, setSullyOpen] = useState(false)
@@ -149,7 +152,7 @@ export default function App() {
         </nav>
 
         {/* Info pareja */}
-        {parejaDoc && (
+        {/* {parejaDoc && (
           <div className="sidebar-pareja">
             <img src={parejaDoc.foto} alt={parejaDoc.nombre} className="pareja-avatar" />
             <div>
@@ -158,7 +161,23 @@ export default function App() {
             </div>
             {syncing && <div className="sync-dot" title="Sincronizando..." />}
           </div>
+        )} */}
+        {parejaDoc ? (
+          <div className="sidebar-pareja" onClick={() => setMostrarParejaManager(true)} style={{ cursor: 'pointer' }}>
+            <img src={parejaDoc.foto} alt={parejaDoc.nombre} className="pareja-avatar" />
+            <div>
+              <div className="pareja-nombre">{parejaDoc.nombre?.split(' ')[0]}</div>
+              <div className="pareja-label">tu pareja ✏️</div>
+            </div>
+            {syncing && <div className="sync-dot" />}
+          </div>
+        ) : (
+          <button className="btn-secondary" style={{ marginTop: 'auto', fontSize: '14px' }} onClick={() => setMostrarParejaManager(true)}>
+            + Invitar pareja
+          </button>
         )}
+
+        {mostrarParejaManager && <ParejaManager onClose={() => setMostrarParejaManager(false)} />}
 
         <button className="btn-logout" onClick={logout}>
           <LogOut size={14} />

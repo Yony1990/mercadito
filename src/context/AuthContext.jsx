@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc, setDoc, collection, query, where, getDocs, onSnapshot, updateDoc, deleteDoc } from 'firebase/firestore'
 import { auth, googleProvider, db } from '../firebase'
@@ -12,6 +12,8 @@ export function AuthProvider({ children }) {
   const [grupoId, setGrupoId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [invPendiente, setInvPendiente] = useState(null)
+  const invUnsubRef = useRef(null)
+  const grupoUnsubRef = useRef(null)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -24,15 +26,20 @@ export function AuthProvider({ children }) {
         setParejaDoc(null)
         setGrupoId(null)
         setInvPendiente(null)
+        invUnsubRef.current?.()
+        grupoUnsubRef.current?.()
       }
       setLoading(false)
     })
     return unsub
   }, [])
 
-  // Escuchar invitaciones en tiempo real cuando el usuario está logueado sin grupo
+  // Escuchar invitaciones SIEMPRE que el usuario esté logueado sin grupo
+  // Esto funciona aunque estén en modo "solo"
   useEffect(() => {
-    if (!user || grupoId) return
+    invUnsubRef.current?.()
+    if (!user) return
+
     const q = query(
       collection(db, 'invitaciones'),
       where('para', '==', user.email),
@@ -45,6 +52,31 @@ export function AuthProvider({ children }) {
         setInvPendiente(null)
       }
     })
+    invUnsubRef.current = unsub
+    return unsub
+  }, [user])
+
+  // Escuchar cambios en el doc del usuario en tiempo real
+  // Esto detecta cuando alguien acepta tu invitación y te asigna grupoId
+  useEffect(() => {
+    grupoUnsubRef.current?.()
+    if (!user) return
+
+    const ref = doc(db, 'usuarios', user.uid)
+    const unsub = onSnapshot(ref, async (snap) => {
+      if (snap.exists()) {
+        const data = snap.data()
+        const nuevoGrupoId = data.grupoId
+        if (nuevoGrupoId && nuevoGrupoId !== grupoId) {
+          setGrupoId(nuevoGrupoId)
+          setUserDoc(data)
+          await cargarPareja(user.uid, nuevoGrupoId)
+          // Limpiar flag de solo si ahora tiene pareja
+          localStorage.removeItem('mercadito_solo')
+        }
+      }
+    })
+    grupoUnsubRef.current = unsub
     return unsub
   }, [user, grupoId])
 
@@ -74,16 +106,20 @@ export function AuthProvider({ children }) {
   }
 
   const cargarPareja = async (miUid, gId) => {
-    const grupoRef = doc(db, 'grupos', gId)
-    const grupoSnap = await getDoc(grupoRef)
-    if (grupoSnap.exists()) {
-      const miembros = grupoSnap.data().miembros || []
-      const parejaUid = miembros.find(uid => uid !== miUid)
-      if (parejaUid) {
-        const parejaRef = doc(db, 'usuarios', parejaUid)
-        const parejaSnap = await getDoc(parejaRef)
-        if (parejaSnap.exists()) setParejaDoc(parejaSnap.data())
+    try {
+      const grupoRef = doc(db, 'grupos', gId)
+      const grupoSnap = await getDoc(grupoRef)
+      if (grupoSnap.exists()) {
+        const miembros = grupoSnap.data().miembros || []
+        const parejaUid = miembros.find(uid => uid !== miUid)
+        if (parejaUid) {
+          const parejaRef = doc(db, 'usuarios', parejaUid)
+          const parejaSnap = await getDoc(parejaRef)
+          if (parejaSnap.exists()) setParejaDoc(parejaSnap.data())
+        }
       }
+    } catch (e) {
+      console.error('Error cargando pareja:', e)
     }
   }
 
@@ -92,7 +128,10 @@ export function AuthProvider({ children }) {
     return result.user
   }
 
-  const logout = () => signOut(auth)
+  const logout = () => {
+    localStorage.removeItem('mercadito_solo')
+    signOut(auth)
+  }
 
   const invitarPareja = async (emailPareja) => {
     if (!user) return { error: 'No autenticado' }
@@ -126,17 +165,15 @@ export function AuthProvider({ children }) {
       await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: grupoRef.id })
       await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoRef.id })
 
-      // Marcar invitación como aceptada
-      const invId = `${invitacion.de}_${user.email}`
       try {
+        const invId = `${invitacion.de}_${user.email}`
         await updateDoc(doc(db, 'invitaciones', invId), { estado: 'aceptada' })
-      } catch (e) {
-        // Si no existe el doc exacto, no importa
-      }
+      } catch (e) {}
 
       setGrupoId(grupoRef.id)
       setUserDoc(prev => ({ ...prev, grupoId: grupoRef.id }))
       setInvPendiente(null)
+      localStorage.removeItem('mercadito_solo')
       await cargarPareja(user.uid, grupoRef.id)
     } catch (e) {
       console.error('Error aceptando invitación:', e)
@@ -150,7 +187,6 @@ export function AuthProvider({ children }) {
       if (parejaDoc?.uid) {
         await updateDoc(doc(db, 'usuarios', parejaDoc.uid), { grupoId: null })
       }
-      // Borrar invitaciones
       const q = query(collection(db, 'invitaciones'), where('de', '==', user.uid))
       const snap = await getDocs(q)
       snap.forEach(d => deleteDoc(d.ref))

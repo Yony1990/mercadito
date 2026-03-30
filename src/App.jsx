@@ -20,16 +20,17 @@ const NAV_ITEMS = [
 ]
 
 export default function App() {
-  const { user, userDoc, parejaDoc, grupoId, loading, logout } = useAuth()
+  const { user, userDoc, parejaDoc, grupoId, loading, logout, invPendiente, aceptarInvitacion } = useAuth()
   const { lista: listaFirestore, historial: historialFirestore, actualizarLista, actualizarHistorial, syncing } = useGrupoData(grupoId)
 
   const [mostrarParejaManager, setMostrarParejaManager] = useState(false)
+  const [mostrarInvBanner, setMostrarInvBanner] = useState(false)
   const [tab, setTab] = useState('lista')
   const [sullyOpen, setSullyOpen] = useState(false)
   const [sullyMensaje, setSullyMensaje] = useState(null)
   const [userName, setUserName] = useState('')
+  const [aceptandoInv, setAceptandoInv] = useState(false)
 
-  // Lista local para cuando no hay grupo
   const [listaLocal, setListaLocal] = useState(() => {
     const s = localStorage.getItem('mercadito_lista')
     return s ? JSON.parse(s) : []
@@ -47,7 +48,6 @@ export default function App() {
     if (!grupoId) localStorage.setItem('mercadito_historial', JSON.stringify(historialLocal))
   }, [historialLocal, grupoId])
 
-  // Usar datos de Firestore si hay grupo, sino local
   const lista = grupoId ? listaFirestore : listaLocal
   const historial = grupoId ? historialFirestore : historialLocal
 
@@ -87,6 +87,15 @@ export default function App() {
       localStorage.setItem('mercadito_nombre', primerNombre)
     }
   }, [userDoc])
+
+  // Mostrar banner de invitación pendiente dentro de la app
+  useEffect(() => {
+    if (invPendiente && !grupoId) {
+      setMostrarInvBanner(true)
+    } else {
+      setMostrarInvBanner(false)
+    }
+  }, [invPendiente, grupoId])
 
   useEffect(() => {
     const hoy = new Date()
@@ -130,6 +139,13 @@ export default function App() {
     setSullyOpen(true)
   }
 
+  const handleAceptarInv = async () => {
+    setAceptandoInv(true)
+    await aceptarInvitacion(invPendiente)
+    setAceptandoInv(false)
+    setMostrarInvBanner(false)
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#d4c9b8' }}>
@@ -138,14 +154,11 @@ export default function App() {
     )
   }
 
-  // Sin login → Login
   if (!user) return <Login />
 
-  // Logueado sin grupo y sin flag de "continuar solo" → Login
   const continuarSolo = localStorage.getItem('mercadito_solo')
   if (!grupoId && !continuarSolo) return <Login />
 
-  // Sin nombre guardado → Onboarding
   const nombreGuardado = localStorage.getItem('mercadito_nombre')
   if (!nombreGuardado) {
     return <Onboarding onComplete={(n) => {
@@ -157,6 +170,30 @@ export default function App() {
 
   return (
     <div className="app-container">
+
+      {/* BANNER INVITACIÓN PENDIENTE dentro de la app */}
+      {mostrarInvBanner && invPendiente && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 3000,
+          background: '#4caf7d', color: 'white', padding: '10px 16px',
+          display: 'flex', alignItems: 'center', gap: '12px',
+          fontFamily: 'var(--font-hand)', fontSize: '15px',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.2)'
+        }}>
+          <span>🎉 <strong>{invPendiente.deNombre?.split(' ')[0]}</strong> te invitó a compartir su Mercadito</span>
+          <button onClick={handleAceptarInv} disabled={aceptandoInv} style={{
+            marginLeft: 'auto', background: 'white', color: '#4caf7d',
+            border: 'none', borderRadius: '16px', padding: '4px 14px',
+            fontFamily: 'var(--font-hand)', fontSize: '14px', cursor: 'pointer', fontWeight: 700
+          }}>
+            {aceptandoInv ? 'Conectando...' : 'Aceptar'}
+          </button>
+          <button onClick={() => setMostrarInvBanner(false)} style={{
+            background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px'
+          }}>✕</button>
+        </div>
+      )}
+
       <aside className="sidebar">
         <div className="sidebar-top">
           <div className="sidebar-logo">
@@ -182,7 +219,6 @@ export default function App() {
           ))}
         </nav>
 
-        {/* Pareja */}
         {parejaDoc ? (
           <div className="sidebar-pareja" onClick={() => setMostrarParejaManager(true)} style={{ cursor: 'pointer' }}>
             <img src={parejaDoc.foto} alt={parejaDoc.nombre} className="pareja-avatar" />
@@ -224,13 +260,17 @@ export default function App() {
         <button className="mobile-nav-btn" onClick={() => setMostrarParejaManager(true)}>
           <span className="mobile-nav-icon">
             {parejaDoc
-              ? <img src={parejaDoc.foto} style={{ width: 20, height: 20, borderRadius: '50%' }} />
+              ? <img src={parejaDoc.foto} style={{ width: 20, height: 20, borderRadius: '50%' }} alt="" />
               : <Users size={18} />
             }
           </span>
           <span>{parejaDoc ? parejaDoc.nombre?.split(' ')[0] : 'Pareja'}</span>
         </button>
-        <div className="toggle">
+        <button className="mobile-nav-btn" onClick={logout}>
+          <span className="mobile-nav-icon"><LogOut size={18} /></span>
+          <span>Salir</span>
+        </button>
+        <div className="toggle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
           <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
           <div className="toggle-bg"></div>
           <div className="toggle-switch">

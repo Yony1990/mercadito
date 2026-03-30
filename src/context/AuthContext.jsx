@@ -58,27 +58,53 @@ export function AuthProvider({ children }) {
 
   // Escuchar cambios en el doc del usuario en tiempo real
   // Esto detecta cuando alguien acepta tu invitación y te asigna grupoId
-  useEffect(() => {
-    grupoUnsubRef.current?.()
-    if (!user) return
+  // useEffect(() => {
+  //   grupoUnsubRef.current?.()
+  //   if (!user) return
 
-    const ref = doc(db, 'usuarios', user.uid)
-    const unsub = onSnapshot(ref, async (snap) => {
-      if (snap.exists()) {
-        const data = snap.data()
-        const nuevoGrupoId = data.grupoId
-        if (nuevoGrupoId && nuevoGrupoId !== grupoId) {
-          setGrupoId(nuevoGrupoId)
-          setUserDoc(data)
-          await cargarPareja(user.uid, nuevoGrupoId)
-          // Limpiar flag de solo si ahora tiene pareja
-          localStorage.removeItem('mercadito_solo')
+  //   const ref = doc(db, 'usuarios', user.uid)
+  //   const unsub = onSnapshot(ref, async (snap) => {
+  //     if (snap.exists()) {
+  //       const data = snap.data()
+  //       const nuevoGrupoId = data.grupoId
+  //       if (nuevoGrupoId && nuevoGrupoId !== grupoId) {
+  //         setGrupoId(nuevoGrupoId)
+  //         setUserDoc(data)
+  //         await cargarPareja(user.uid, nuevoGrupoId)
+    
+  //         localStorage.removeItem('mercadito_solo')
+  //       }
+  //     }
+  //   })
+  //   grupoUnsubRef.current = unsub
+  //   return unsub
+  // }, [user, grupoId])
+
+  useEffect(() => {
+    if (!user) return;
+
+    // 1. Escuchamos el documento del usuario propio
+    const userRef = doc(db, 'usuarios', user.uid);
+    
+    const unsub = onSnapshot(userRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        
+        // 2. Si aparece un grupoId que antes no teníamos...
+        if (data.grupoId && data.grupoId !== grupoId) {
+          console.log("¡Grupo detectado! Sincronizando...");
+          setGrupoId(data.grupoId); // Esto activará el useGrupoData automáticamente
+          
+          // Cargamos los datos de la pareja si existen
+          cargarPareja(user.uid, data.grupoId);
         }
       }
-    })
-    grupoUnsubRef.current = unsub
-    return unsub
-  }, [user, grupoId])
+    });
+
+    return () => unsub();
+  }, [user, grupoId]);
+
+
 
   const cargarUsuario = async (firebaseUser) => {
     const ref = doc(db, 'usuarios', firebaseUser.uid)

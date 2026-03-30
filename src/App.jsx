@@ -21,279 +21,123 @@ const NAV_ITEMS = [
 
 export default function App() {
   const { user, userDoc, parejaDoc, grupoId, loading, logout, invPendiente, aceptarInvitacion } = useAuth()
+  
+  // El hook useGrupoData ahora se activará solo si grupoId existe
   const { lista: listaFirestore, historial: historialFirestore, actualizarLista, actualizarHistorial, syncing } = useGrupoData(grupoId)
 
-  const [mostrarParejaManager, setMostrarParejaManager] = useState(false)
-  const [mostrarInvBanner, setMostrarInvBanner] = useState(false)
   const [tab, setTab] = useState('lista')
+  const [mostrarParejaManager, setMostrarParejaManager] = useState(false)
   const [sullyOpen, setSullyOpen] = useState(false)
   const [sullyMensaje, setSullyMensaje] = useState(null)
-  const [userName, setUserName] = useState('')
   const [aceptandoInv, setAceptandoInv] = useState(false)
 
-  const [listaLocal, setListaLocal] = useState(() => {
-    const s = localStorage.getItem('mercadito_lista')
-    return s ? JSON.parse(s) : []
-  })
-  const [historialLocal, setHistorialLocal] = useState(() => {
-    const s = localStorage.getItem('mercadito_historial')
-    return s ? JSON.parse(s) : []
-  })
+  // Estados locales solo para modo Offline/Solo
+  const [listaLocal, setListaLocal] = useState(() => JSON.parse(localStorage.getItem('mercadito_lista') || '[]'))
+  const [historialLocal, setHistorialLocal] = useState(() => JSON.parse(localStorage.getItem('mercadito_historial') || '[]'))
 
-  useEffect(() => {
-    if (!grupoId) localStorage.setItem('mercadito_lista', JSON.stringify(listaLocal))
-  }, [listaLocal, grupoId])
+  // Persistencia local (solo si no hay grupoId)
+  useEffect(() => { if (!grupoId) localStorage.setItem('mercadito_lista', JSON.stringify(listaLocal)) }, [listaLocal, grupoId])
+  useEffect(() => { if (!grupoId) localStorage.setItem('mercadito_historial', JSON.stringify(historialLocal)) }, [historialLocal, grupoId])
 
-  useEffect(() => {
-    if (!grupoId) localStorage.setItem('mercadito_historial', JSON.stringify(historialLocal))
-  }, [historialLocal, grupoId])
-
+  // LÓGICA DE DATOS: Si hay grupoId usa Firestore, si no usa Local
   const lista = grupoId ? listaFirestore : listaLocal
   const historial = grupoId ? historialFirestore : historialLocal
 
   const setLista = (fn) => {
-    if (grupoId) {
-      const nueva = typeof fn === 'function' ? fn(lista) : fn
-      actualizarLista(nueva)
-    } else {
-      setListaLocal(fn)
-    }
+    const nueva = typeof fn === 'function' ? fn(lista) : fn
+    if (grupoId) actualizarLista(nueva); else setListaLocal(nueva);
   }
 
   const setHistorial = (fn) => {
-    if (grupoId) {
-      const nuevo = typeof fn === 'function' ? fn(historial) : fn
-      actualizarHistorial(nuevo)
-    } else {
-      setHistorialLocal(fn)
-    }
+    const nuevo = typeof fn === 'function' ? fn(historial) : fn
+    if (grupoId) actualizarHistorial(nuevo); else setHistorialLocal(nuevo);
   }
 
-  const [darkMode, setDarkMode] = useState(() => {
-    const saved = localStorage.getItem('mercadito_theme')
-    if (saved) return saved === 'dark'
-    return false
-  })
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode)
-    localStorage.setItem('mercadito_theme', darkMode ? 'dark' : 'light')
-  }, [darkMode])
-
-  useEffect(() => {
-    if (userDoc?.nombre) {
-      const primerNombre = userDoc.nombre.split(' ')[0]
-      setUserName(primerNombre)
-      localStorage.setItem('mercadito_nombre', primerNombre)
-    }
-  }, [userDoc])
-
-  // Mostrar banner de invitación pendiente dentro de la app
-  useEffect(() => {
-    if (invPendiente && !grupoId) {
-      setMostrarInvBanner(true)
-    } else {
-      setMostrarInvBanner(false)
-    }
-  }, [invPendiente, grupoId])
-
-  useEffect(() => {
-    const hoy = new Date()
-    const esViernes = hoy.getDay() === 5
-    const yaVio = localStorage.getItem('mercadito_viernes_' + hoy.toDateString())
-    if (esViernes && !yaVio) {
-      setTimeout(() => {
-        setSullyMensaje('viernes')
-        setSullyOpen(true)
-        localStorage.setItem('mercadito_viernes_' + hoy.toDateString(), '1')
-      }, 2000)
-    }
-  }, [])
-
-  const agregarItem = (item) => {
-    setLista(prev => {
-      const existe = prev.find(i => i.id === item.id)
-      if (existe) return prev
-      return [...prev, { ...item, checked: false, cantidad: 1, sobrante: false }]
-    })
-    setTab('lista')
-  }
-
-  const finalizarCompra = () => {
-    const compraActual = {
-      id: Date.now(),
-      fecha: new Date().toISOString(),
-      items: lista.map(i => ({ ...i }))
-    }
-    setHistorial(prev => [compraActual, ...prev.slice(0, 19)])
-    setLista([])
-    setSullyMensaje('compra_guardada')
-    setSullyOpen(true)
-  }
-
-  const repetirCompra = (compra) => {
-    const nuevaLista = compra.items.map(i => ({ ...i, checked: false, sobrante: false }))
-    setLista(nuevaLista)
-    setTab('lista')
-    setSullyMensaje('lista_repetida')
-    setSullyOpen(true)
-  }
-
-  const handleAceptarInv = async () => {
-    setAceptandoInv(true)
-    await aceptarInvitacion(invPendiente)
-    setAceptandoInv(false)
-    setMostrarInvBanner(false)
-  }
-
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#d4c9b8' }}>
-        <div style={{ fontFamily: 'cursive', fontSize: '24px', color: '#5b8dd9' }}>Cargando...</div>
-      </div>
-    )
-  }
-
+  // --- Lógica de Renderizado ---
+  if (loading) return <div className="loading-screen">Cargando Mercadito...</div>
   if (!user) return <Login />
 
+  // Si no tiene grupo y no ha marcado "continuar solo", forzamos pantalla de vinculación (Login)
   const continuarSolo = localStorage.getItem('mercadito_solo')
   if (!grupoId && !continuarSolo) return <Login />
 
+  // Onboarding (Nombre)
   const nombreGuardado = localStorage.getItem('mercadito_nombre')
   if (!nombreGuardado) {
     return <Onboarding onComplete={(n) => {
       localStorage.setItem('mercadito_nombre', n)
-      setUserName(n)
       window.location.reload()
     }} />
   }
 
+  // Handlers
+  const agregarItem = (item) => {
+    setLista(prev => prev.find(i => i.id === item.id) ? prev : [...prev, { ...item, checked: false, cantidad: 1, sobrante: false }])
+    setTab('lista')
+  }
+
+  const finalizarCompra = () => {
+    const compraActual = { id: Date.now(), fecha: new Date().toISOString(), items: lista.map(i => ({ ...i })) }
+    setHistorial(prev => [compraActual, ...prev.slice(0, 19)])
+    setLista([])
+    setSullyMensaje('compra_guardada'); setSullyOpen(true)
+  }
+
   return (
     <div className="app-container">
-
-      {/* BANNER INVITACIÓN PENDIENTE dentro de la app */}
-      {mostrarInvBanner && invPendiente && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 3000,
-          background: '#4caf7d', color: 'white', padding: '10px 16px',
-          display: 'flex', alignItems: 'center', gap: '12px',
-          fontFamily: 'var(--font-hand)', fontSize: '15px',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.2)'
-        }}>
-          <span>🎉 <strong>{invPendiente.deNombre?.split(' ')[0]}</strong> te invitó a compartir su Mercadito</span>
-          <button onClick={handleAceptarInv} disabled={aceptandoInv} style={{
-            marginLeft: 'auto', background: 'white', color: '#4caf7d',
-            border: 'none', borderRadius: '16px', padding: '4px 14px',
-            fontFamily: 'var(--font-hand)', fontSize: '14px', cursor: 'pointer', fontWeight: 700
-          }}>
-            {aceptandoInv ? 'Conectando...' : 'Aceptar'}
-          </button>
-          <button onClick={() => setMostrarInvBanner(false)} style={{
-            background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '18px'
-          }}>✕</button>
+      {/* Banner de invitación (si entra solo pero le llega una inv) */}
+      {invPendiente && !grupoId && (
+        <div className="invitation-banner">
+          <span>🎉 {invPendiente.deNombre} te invitó</span>
+          <button onClick={() => aceptarInvitacion(invPendiente)}>Aceptar</button>
         </div>
       )}
 
       <aside className="sidebar">
-        <div className="sidebar-top">
-          <div className="sidebar-logo">
-            <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
-            <span className="logo-text">Mercadito</span>
-          </div>
-          <div className="toggle">
-            <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
-            <div className="toggle-bg"></div>
-            <div className="toggle-switch">
-              <div className="toggle-switch-figure"></div>
-              <div className="toggle-switch-figureAlt"></div>
-            </div>
-          </div>
+        <div className="sidebar-logo">
+          <ShoppingBag size={26} color="var(--accent)" />
+          <span className="logo-text">Mercadito</span>
         </div>
-
         <nav className="sidebar-nav">
           {NAV_ITEMS.map(item => (
             <button key={item.id} className={`nav-btn ${tab === item.id ? 'active' : ''}`} onClick={() => setTab(item.id)}>
-              <span className="nav-icon">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
+              {item.icon} <span className="nav-label">{item.label}</span>
             </button>
           ))}
         </nav>
-
         {parejaDoc ? (
-          <div className="sidebar-pareja" onClick={() => setMostrarParejaManager(true)} style={{ cursor: 'pointer' }}>
-            <img src={parejaDoc.foto} alt={parejaDoc.nombre} className="pareja-avatar" />
+          <div className="sidebar-pareja" onClick={() => setMostrarParejaManager(true)}>
+            <img src={parejaDoc.foto} className="pareja-avatar" alt="" />
             <div>
               <div className="pareja-nombre">{parejaDoc.nombre?.split(' ')[0]}</div>
-              <div className="pareja-label">tu pareja ✏️</div>
+              <div className="pareja-label">en línea {syncing && '🔄'}</div>
             </div>
-            {syncing && <div className="sync-dot" />}
           </div>
         ) : (
-          <button className="nav-btn" style={{ marginTop: 'auto' }} onClick={() => setMostrarParejaManager(true)}>
-            <span className="nav-icon"><Users size={18} /></span>
-            <span className="nav-label">Invitar pareja</span>
+          <button className="nav-btn" onClick={() => setMostrarParejaManager(true)}>
+            <Users size={18} /> <span className="nav-label">Invitar pareja</span>
           </button>
         )}
-
-        <button className="btn-logout" onClick={logout}>
-          <LogOut size={14} />
-          Cerrar sesión
-        </button>
+        <button className="btn-logout" onClick={logout}><LogOut size={14} /> Salir</button>
       </aside>
 
       <main className="app-main">
         <div className="notebook-lines">
-          {tab === 'lista' && <ListaActiva lista={lista} setLista={setLista} onFinalizar={finalizarCompra} historial={historial} onRepetir={repetirCompra} />}
+          {tab === 'lista' && <ListaActiva lista={lista} setLista={setLista} onFinalizar={finalizarCompra} historial={historial} onRepetir={(c) => { setLista(c.items.map(i => ({...i, checked: false}))); setTab('lista') }} />}
           {tab === 'catalogo' && <Catalogo onAgregar={agregarItem} listaActual={lista} />}
-          {tab === 'historial' && <Historial historial={historial} onRepetir={repetirCompra} />}
+          {tab === 'historial' && <Historial historial={historial} onRepetir={(c) => { setLista(c.items.map(i => ({...i, checked: false}))); setTab('lista') }} />}
           {tab === 'stats' && <Estadisticas historial={historial} lista={lista} />}
         </div>
       </main>
 
-      <nav className="mobile-nav">
-        {NAV_ITEMS.map(item => (
-          <button key={item.id} className={`mobile-nav-btn ${tab === item.id ? 'active' : ''}`} onClick={() => setTab(item.id)}>
-            <span className="mobile-nav-icon">{item.icon}</span>
-            <span>{item.label}</span>
-          </button>
-        ))}
-        <button className="mobile-nav-btn" onClick={() => setMostrarParejaManager(true)}>
-          <span className="mobile-nav-icon">
-            {parejaDoc
-              ? <img src={parejaDoc.foto} style={{ width: 20, height: 20, borderRadius: '50%' }} alt="" />
-              : <Users size={18} />
-            }
-          </span>
-          <span>{parejaDoc ? parejaDoc.nombre?.split(' ')[0] : 'Pareja'}</span>
-        </button>
-        <button className="mobile-nav-btn" onClick={logout}>
-          <span className="mobile-nav-icon"><LogOut size={18} /></span>
-          <span>Salir</span>
-        </button>
-        <div className="toggle" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-          <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
-          <div className="toggle-bg"></div>
-          <div className="toggle-switch">
-            <div className="toggle-switch-figure"></div>
-            <div className="toggle-switch-figureAlt"></div>
-          </div>
-        </div>
-      </nav>
-
       {mostrarParejaManager && <ParejaManager onClose={() => setMostrarParejaManager(false)} />}
-
-      <Sully
-        open={sullyOpen} setOpen={setSullyOpen}
+      
+      <Sully 
+        open={sullyOpen} setOpen={setSullyOpen} 
         mensajeInicial={sullyMensaje} setMensajeInicial={setSullyMensaje}
         historial={historial} lista={lista}
-        onRepetirUltima={() => { if (historial.length > 0) repetirCompra(historial[0]) }}
-        onAgregarItem={(item) => setLista(prev => {
-          const existe = prev.find(i => i.nombre.toLowerCase() === item.nombre.toLowerCase())
-          if (existe) return prev
-          return [...prev, item]
-        })}
-        darkMode={darkMode}
-        userName={userName}
+        onAgregarItem={agregarItem}
+        userName={nombreGuardado}
       />
     </div>
   )

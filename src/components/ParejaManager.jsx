@@ -27,8 +27,10 @@ export default function ParejaManager({ onClose }) {
     if (res?.error) {
       mostrarMsg(res.error, 'error')
     } else {
-      mostrarMsg('¡Invitación enviada! Que entre a la app y la acepte.')
+      mostrarMsg('¡Invitación enviada! Esperá que entre a la app.')
       setEmailPareja('')
+      // Cerrar el modal después de 2 segundos
+      setTimeout(() => onClose(), 2000)
     }
   }
 

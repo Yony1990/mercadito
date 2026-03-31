@@ -71,7 +71,7 @@ export function AuthProvider({ children }) {
           setGrupoId(nuevoGrupoId)
           setUserDoc(data)
           await cargarPareja(user.uid, nuevoGrupoId)
-    
+          // Limpiar flag de solo si ahora tiene pareja
           localStorage.removeItem('mercadito_solo')
         }
       }
@@ -137,6 +137,11 @@ export function AuthProvider({ children }) {
     if (!user) return { error: 'No autenticado' }
     if (emailPareja === user.email) return { error: 'No podés invitarte a vos mismo' }
     try {
+      // Borrar invitaciones previas de este usuario para evitar duplicados
+      const qPrev = query(collection(db, 'invitaciones'), where('de', '==', user.uid))
+      const snapPrev = await getDocs(qPrev)
+      snapPrev.forEach(d => deleteDoc(d.ref))
+
       const invRef = doc(db, 'invitaciones', `${user.uid}_${emailPareja}`)
       await setDoc(invRef, {
         de: user.uid,
@@ -155,26 +160,46 @@ export function AuthProvider({ children }) {
   const aceptarInvitacion = async (invitacion) => {
     if (!user) return
     try {
-      const grupoRef = doc(collection(db, 'grupos'))
-      await setDoc(grupoRef, {
-        miembros: [invitacion.de, user.uid],
-        creadoEn: new Date().toISOString(),
-        lista: [],
-        historial: []
-      })
-      await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: grupoRef.id })
-      await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoRef.id })
+      // Verificar si el invitador ya tiene un grupo existente
+      const invitadorDoc = await getDoc(doc(db, 'usuarios', invitacion.de))
+      let grupoFinalId = null
 
+      if (invitadorDoc.exists() && invitadorDoc.data().grupoId) {
+        // Usar el grupo existente del invitador
+        grupoFinalId = invitadorDoc.data().grupoId
+        // Agregar al aceptador como miembro
+        await updateDoc(doc(db, 'grupos', grupoFinalId), {
+          miembros: [invitacion.de, user.uid]
+        })
+      } else {
+        // Crear grupo nuevo
+        const grupoRef = doc(collection(db, 'grupos'))
+        await setDoc(grupoRef, {
+          miembros: [invitacion.de, user.uid],
+          creadoEn: new Date().toISOString(),
+          lista: [],
+          historial: []
+        })
+        grupoFinalId = grupoRef.id
+      }
+
+      // Actualizar ambos usuarios con el mismo grupoId
+      await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: grupoFinalId })
+      await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoFinalId })
+
+      // Marcar todas las invitaciones entre ellos como aceptadas
       try {
-        const invId = `${invitacion.de}_${user.email}`
-        await updateDoc(doc(db, 'invitaciones', invId), { estado: 'aceptada' })
+        await updateDoc(doc(db, 'invitaciones', `${invitacion.de}_${user.email}`), { estado: 'aceptada' })
+      } catch (e) {}
+      try {
+        await updateDoc(doc(db, 'invitaciones', `${user.uid}_${invitacion.deEmail}`), { estado: 'aceptada' })
       } catch (e) {}
 
-      setGrupoId(grupoRef.id)
-      setUserDoc(prev => ({ ...prev, grupoId: grupoRef.id }))
+      setGrupoId(grupoFinalId)
+      setUserDoc(prev => ({ ...prev, grupoId: grupoFinalId }))
       setInvPendiente(null)
       localStorage.removeItem('mercadito_solo')
-      await cargarPareja(user.uid, grupoRef.id)
+      await cargarPareja(user.uid, grupoFinalId)
     } catch (e) {
       console.error('Error aceptando invitación:', e)
     }

@@ -158,52 +158,34 @@ export function AuthProvider({ children }) {
   }
 
   const aceptarInvitacion = async (invitacion) => {
-    if (!user) return
-    try {
-      // Verificar si el invitador ya tiene un grupo existente
-      const invitadorDoc = await getDoc(doc(db, 'usuarios', invitacion.de))
-      let grupoFinalId = null
+  if (!user) return
+  try {
+    // Siempre crear grupo nuevo
+    const grupoRef = doc(collection(db, 'grupos'))
+    await setDoc(grupoRef, {
+      miembros: [invitacion.de, user.uid],
+      creadoEn: new Date().toISOString(),
+      lista: [],
+      historial: []
+    })
 
-      if (invitadorDoc.exists() && invitadorDoc.data().grupoId) {
-        // Usar el grupo existente del invitador
-        grupoFinalId = invitadorDoc.data().grupoId
-        // Agregar al aceptador como miembro
-        await updateDoc(doc(db, 'grupos', grupoFinalId), {
-          miembros: [invitacion.de, user.uid]
-        })
-      } else {
-        // Crear grupo nuevo
-        const grupoRef = doc(collection(db, 'grupos'))
-        await setDoc(grupoRef, {
-          miembros: [invitacion.de, user.uid],
-          creadoEn: new Date().toISOString(),
-          lista: [],
-          historial: []
-        })
-        grupoFinalId = grupoRef.id
-      }
+    // Actualizar ambos usuarios
+    await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: grupoRef.id })
+    await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoRef.id })
 
-      // Actualizar ambos usuarios con el mismo grupoId
-      await updateDoc(doc(db, 'usuarios', user.uid), { grupoId: grupoFinalId })
-      await updateDoc(doc(db, 'usuarios', invitacion.de), { grupoId: grupoFinalId })
+    // Marcar invitaciones como aceptadas
+    try { await updateDoc(doc(db, 'invitaciones', `${invitacion.de}_${user.email}`), { estado: 'aceptada' }) } catch(e) {}
+    try { await updateDoc(doc(db, 'invitaciones', `${user.uid}_${invitacion.deEmail}`), { estado: 'aceptada' }) } catch(e) {}
 
-      // Marcar todas las invitaciones entre ellos como aceptadas
-      try {
-        await updateDoc(doc(db, 'invitaciones', `${invitacion.de}_${user.email}`), { estado: 'aceptada' })
-      } catch (e) {}
-      try {
-        await updateDoc(doc(db, 'invitaciones', `${user.uid}_${invitacion.deEmail}`), { estado: 'aceptada' })
-      } catch (e) {}
-
-      setGrupoId(grupoFinalId)
-      setUserDoc(prev => ({ ...prev, grupoId: grupoFinalId }))
-      setInvPendiente(null)
-      localStorage.removeItem('mercadito_solo')
-      await cargarPareja(user.uid, grupoFinalId)
-    } catch (e) {
-      console.error('Error aceptando invitación:', e)
-    }
+    setGrupoId(grupoRef.id)
+    setUserDoc(prev => ({ ...prev, grupoId: grupoRef.id }))
+    setInvPendiente(null)
+    localStorage.removeItem('mercadito_solo')
+    await cargarPareja(user.uid, grupoRef.id)
+  } catch (e) {
+    console.error('Error aceptando invitación:', e)
   }
+}
 
   const desvincularPareja = async () => {
     if (!user || !grupoId) return

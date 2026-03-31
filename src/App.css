@@ -778,7 +778,7 @@ body {
     right: 10px;
     background: var(--paper);
     border-top: none;
-    border-radius: 20px;
+    border-radius: 30px;
     z-index: 200;
     box-shadow: 0 4px 24px var(--shadow);
     padding: 4px;
@@ -1158,9 +1158,14 @@ body {
     margin-left: 20px;
     height: 27px;
   }
+  .toggle-switch {
+    position: relative;
+    right: 1px;
+  }
   .toggle-input:checked ~ .toggle-switch {
     /* margin-left: -20px; */
     position: relative;
-    left: -13px;
+    left: -12px;
   }
+  
 }

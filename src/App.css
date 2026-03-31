@@ -778,10 +778,10 @@ body {
     right: 10px;
     background: var(--paper);
     border-top: none;
-    border-radius: 50px;
+    border-radius: 30px;
     z-index: 200;
     box-shadow: 0 4px 24px var(--shadow);
-    padding: 4px;
+    padding: 5px;
   }
   .mobile-nav-btn {
     flex: 1;
@@ -804,7 +804,7 @@ body {
     color: var(--accent);
   background: #e8f0fe;
   border-radius: 45px;
-  padding: 8px 0px;
+  padding: 5px 0px;
     
   }
   .dark .mobile-nav-btn.active {

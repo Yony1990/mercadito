@@ -797,7 +797,7 @@ body {
     font-family: var(--font-hand);
     font-size: 11px;
     color: var(--ink3);
-    transition: all .2s ease;
+    transition: all .2s ease;min-width: 20px;
   }
   .mobile-nav-btn span:first-child { font-size: 20px; }
   .mobile-nav-btn.active { 
@@ -813,9 +813,9 @@ body {
   .mobile-nav-btn.active span:first-child { transform: scale(1.15); }
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .sully-widget { bottom: 60px !important; }
-}
+} */
 
 /* SIDEBAR TOP */
 .sidebar-top {
@@ -942,6 +942,7 @@ body {
   border-radius: 40px;
   flex-shrink: 0;
   scale: .7;
+
 }
 .toggle:before, .toggle:after { content: ''; display: table; }
 .toggle:after { clear: both; }
@@ -1166,6 +1167,12 @@ body {
     /* margin-left: -20px; */
     position: relative;
     left: -12px;
+  }
+
+  .sully-widget {
+
+    display: none;
+
   }
   
 }

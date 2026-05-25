@@ -255,7 +255,7 @@ Datos actuales del usuario:
   const msgActual = mensajeInicial ? MENSAJES[mensajeInicial] : null
 
   return (
-    <div className="sully-widget" style={{ position: 'fixed', bottom: '20px', right: '16px', zIndex: 999, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+    <div className="sully-widget" style={{ position: 'fixed', bottom: '20px', right: '16px', zIndex: 999, flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
 
       {chatAbierto && (
         <div style={{

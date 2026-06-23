@@ -62,7 +62,7 @@ export default function Notificaciones() {
   }
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ position: 'absolute', display: 'inline-block' }}>
       <button
         onClick={handleClick}
         disabled={estado === 'activando' || estado === 'enviando'}

@@ -1,3 +1,4 @@
+
 // import { useState, useEffect } from 'react'
 // import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag, LogOut, Users } from 'lucide-react'
 // import ListaActiva from './components/ListaActiva'
@@ -21,7 +22,18 @@
 
 // export default function App() {
 //   const { user, userDoc, parejaDoc, grupoId, loading, logout, invPendiente, aceptarInvitacion } = useAuth()
-//   const { lista: listaFirestore, historial: historialFirestore, actualizarLista, actualizarHistorial, syncing } = useGrupoData(grupoId)
+
+//   const { 
+//     lista: listaFirestore, 
+//     historial: historialFirestore, 
+//     precios: preciosFirestore, 
+//     catalogoCustom: catalogoCustomFirestore,
+//     actualizarLista, 
+//     actualizarHistorial, 
+//     actualizarPrecios,
+//     actualizarCatalogoCustom,
+//     syncing 
+//   } = useGrupoData(grupoId)
 
 //   const [mostrarParejaManager, setMostrarParejaManager] = useState(false)
 //   const [mostrarInvBanner, setMostrarInvBanner] = useState(false)
@@ -31,12 +43,21 @@
 //   const [userName, setUserName] = useState('')
 //   const [aceptandoInv, setAceptandoInv] = useState(false)
 
+
 //   const [listaLocal, setListaLocal] = useState(() => {
 //     const s = localStorage.getItem('mercadito_lista')
 //     return s ? JSON.parse(s) : []
 //   })
 //   const [historialLocal, setHistorialLocal] = useState(() => {
 //     const s = localStorage.getItem('mercadito_historial')
+//     return s ? JSON.parse(s) : []
+//   })
+//   const [preciosLocal, setPreciosLocal] = useState(() => {
+//     const s = localStorage.getItem('mercadito_precios')
+//     return s ? JSON.parse(s) : {}
+//   })
+//   const [catalogoCustomLocal, setCatalogoCustomLocal] = useState(() => {
+//     const s = localStorage.getItem('mercadito_catalogo_custom')
 //     return s ? JSON.parse(s) : []
 //   })
 
@@ -48,8 +69,18 @@
 //     if (!grupoId) localStorage.setItem('mercadito_historial', JSON.stringify(historialLocal))
 //   }, [historialLocal, grupoId])
 
+//   useEffect(() => {
+//     if (!grupoId) localStorage.setItem('mercadito_precios', JSON.stringify(preciosLocal))
+//   }, [preciosLocal, grupoId])
+
+//   useEffect(() => {
+//     if (!grupoId) localStorage.setItem('mercadito_catalogo_custom', JSON.stringify(catalogoCustomLocal))
+//   }, [catalogoCustomLocal, grupoId])
+
 //   const lista = grupoId ? listaFirestore : listaLocal
 //   const historial = grupoId ? historialFirestore : historialLocal
+//   const precios = grupoId ? preciosFirestore : preciosLocal
+//   const catalogoCustom = grupoId ? catalogoCustomFirestore : catalogoCustomLocal
 
 //   const setLista = (fn) => {
 //     if (grupoId) {
@@ -66,6 +97,22 @@
 //       actualizarHistorial(nuevo)
 //     } else {
 //       setHistorialLocal(fn)
+//     }
+//   }
+
+//   const setPrecios = (nuevosPrecios) => {
+//     if (grupoId) {
+//       actualizarPrecios(nuevosPrecios)
+//     } else {
+//       setPreciosLocal(nuevosPrecios)
+//     }
+//   }
+
+//   const setCatalogoCustom = (nuevoCatalogo) => {
+//     if (grupoId) {
+//       actualizarCatalogoCustom(nuevoCatalogo)
+//     } else {
+//       setCatalogoCustomLocal(nuevoCatalogo)
 //     }
 //   }
 
@@ -88,7 +135,6 @@
 //     }
 //   }, [userDoc])
 
-  
 //   useEffect(() => {
 //     if (invPendiente && !grupoId) {
 //       setMostrarInvBanner(true)
@@ -110,13 +156,22 @@
 //     }
 //   }, [])
 
+
 //   const agregarItem = (item) => {
 //     setLista(prev => {
-//       const existe = prev.find(i => i.id === item.id)
-//       if (existe) return prev
-//       return [...prev, { ...item, checked: false, cantidad: 1, sobrante: false }]
+//       const existeIndex = prev.findIndex(i => i.id === item.id)
+      
+//       if (existeIndex !== -1) {
+//         return prev.map(i => i.id === item.id ? { ...i, cantidad: item.cantidad } : i)
+//       }
+      
+//       return [...prev, { ...item, checked: false, cantidad: item.cantidad || 1, sobrante: false }]
 //     })
 //     setTab('lista')
+//   }
+
+//   const quitarItem = (itemId) => {
+//     setLista(prev => prev.filter(i => i.id !== itemId))
 //   }
 
 //   const finalizarCompra = () => {
@@ -171,7 +226,7 @@
 //   return (
 //     <div className="app-container">
 
-      
+     
 //       {mostrarInvBanner && invPendiente && (
 //         <div style={{
 //           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 3000,
@@ -241,15 +296,36 @@
 //         </button>
 //       </aside>
 
+     
 //       <main className="app-main">
 //         <div className="notebook-lines">
-//           {tab === 'lista' && <ListaActiva lista={lista} setLista={setLista} onFinalizar={finalizarCompra} historial={historial} onRepetir={repetirCompra} />}
-//           {tab === 'catalogo' && <Catalogo onAgregar={agregarItem} listaActual={lista} />}
+//           {tab === 'lista' && (
+//             <ListaActiva 
+//               lista={lista} 
+//               setLista={setLista} 
+//               onFinalizar={finalizarCompra} 
+//               historial={historial} 
+//               onRepetir={repetirCompra} 
+//               precios={precios}
+//             />
+//           )}
+//           {tab === 'catalogo' && (
+//             <Catalogo 
+//               onAgregar={agregarItem} 
+//               onQuitar={quitarItem}
+//               listaActual={lista} 
+//               precios={precios}
+//               actualizarPrecios={setPrecios}
+//               catalogoCustom={catalogoCustom}
+//               actualizarCatalogoCustom={setCatalogoCustom}
+//             />
+//           )}
 //           {tab === 'historial' && <Historial historial={historial} onRepetir={repetirCompra} />}
 //           {tab === 'stats' && <Estadisticas historial={historial} lista={lista} />}
 //         </div>
 //       </main>
 
+     
 //       <nav className="mobile-nav">
 //         {NAV_ITEMS.map(item => (
 //           <button key={item.id} className={`mobile-nav-btn ${tab === item.id ? 'active' : ''}`} onClick={() => setTab(item.id)}>
@@ -300,6 +376,7 @@
 // }
 
 
+
 import { useState, useEffect } from 'react'
 import { ShoppingCart, BookOpen, History, BarChart2, ShoppingBag, LogOut, Users } from 'lucide-react'
 import ListaActiva from './components/ListaActiva'
@@ -310,6 +387,7 @@ import Sully from './components/Sully'
 import Onboarding from './components/Onboarding'
 import Login from './components/Login'
 import ParejaManager from './components/ParejaManager'
+import Notificaciones from './components/Notificaciones'
 import { useAuth } from './context/AuthContext'
 import { useGrupoData } from './hooks/useGrupoData'
 import './App.css'
@@ -562,12 +640,15 @@ export default function App() {
             <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
             <span className="logo-text">Mercadito</span>
           </div>
-          <div className="toggle">
-            <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
-            <div className="toggle-bg"></div>
-            <div className="toggle-switch">
-              <div className="toggle-switch-figure"></div>
-              <div className="toggle-switch-figureAlt"></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {parejaDoc && <Notificaciones />}
+            <div className="toggle">
+              <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
+              <div className="toggle-bg"></div>
+              <div className="toggle-switch">
+                <div className="toggle-switch-figure"></div>
+                <div className="toggle-switch-figureAlt"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -640,6 +721,13 @@ export default function App() {
             <span>{item.label}</span>
           </button>
         ))}
+        {parejaDoc && (
+          <button className="mobile-nav-btn" onClick={() => {}} style={{ pointerEvents: 'none' }}>
+            <span className="mobile-nav-icon" style={{ pointerEvents: 'auto' }}>
+              <Notificaciones />
+            </span>
+          </button>
+        )}
         <button className="mobile-nav-btn" onClick={() => setMostrarParejaManager(true)}>
           <span className="mobile-nav-icon">
             {parejaDoc

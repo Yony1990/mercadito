@@ -1162,6 +1162,9 @@ body {
   input, textarea, select {
     font-size: 16px !important;
   }
+  .alltoggle {
+    display: none;
+  }
   .toggle {
     top: 15px;
     right: 10px;
@@ -1188,10 +1191,6 @@ body {
     display: flex;
   }
 
-
-  .sidebar {
-    display: none;
-  }
   
   
 }

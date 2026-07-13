@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import sullyImg from '../assets/sully.png'
+import sullyImg from '../../public/logo1.PNG'
 import './Login.css'
 
 export default function Login() {

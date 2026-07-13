@@ -722,13 +722,13 @@ export default function App() {
             <span>{item.label}</span>
           </button>
         ))}
-        {parejaDoc && (
-          {/* <button className="mobile-nav-btn" onClick={() => {}} style={{ pointerEvents: 'none' }}>
+        {/* {parejaDoc && (
+          <button className="mobile-nav-btn" onClick={() => {}} style={{ pointerEvents: 'none' }}>
             <span className="mobile-nav-icon" style={{ pointerEvents: 'auto' }}>
               <Notificaciones />
             </span>
-          </button> */}
-        )}
+          </button>
+        )} */}
         <button className="mobile-nav-btn" onClick={() => setMostrarParejaManager(true)}>
           <span className="mobile-nav-icon">
             {parejaDoc

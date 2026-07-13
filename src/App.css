@@ -58,7 +58,8 @@ body {
   background-color: red;
   display: flex;
   padding: 10px;
-  align-items: end;
+  align-items: center;
+  justify-content: end;
 }
 
 /* SIDEBAR */

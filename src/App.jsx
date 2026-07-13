@@ -725,7 +725,7 @@ export default function App() {
         {parejaDoc && (
           <button className="mobile-nav-btn" onClick={() => {}} style={{ pointerEvents: 'none' }}>
             <span className="mobile-nav-icon" style={{ pointerEvents: 'auto' }}>
-              <Notificaciones />
+              {/* <Notificaciones /> */}
             </span>
           </button>
         )}

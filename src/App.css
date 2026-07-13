@@ -1163,10 +1163,11 @@ body {
     font-size: 16px !important;
   }
   .toggle {
-    top: 15px;
+    display: none;
+    /* top: 15px;
     right: 10px;
     margin-left: 20px;
-    height: 27px;
+    height: 27px; */
   }
   .toggle-switch {
     position: relative;
@@ -1188,8 +1189,6 @@ body {
     display: flex;
   }
 
-  .toggle {
-    display: none;
-  }
+  
   
 }

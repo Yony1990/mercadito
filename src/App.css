@@ -125,7 +125,7 @@ body {
   background: none;
   border: none;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   color: var(--ink3);
   transition: all 0.15s;

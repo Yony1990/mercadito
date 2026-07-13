@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import sullyImg from '../assets/sully.png'
+import sullyImg from '../../public/logo1.PNG'
 import './Onboarding.css'
 
 export default function Onboarding({ onComplete }) {

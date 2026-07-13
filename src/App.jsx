@@ -723,11 +723,11 @@ export default function App() {
           </button>
         ))}
         {parejaDoc && (
-          <button className="mobile-nav-btn" onClick={() => {}} style={{ pointerEvents: 'none' }}>
+          {/* <button className="mobile-nav-btn" onClick={() => {}} style={{ pointerEvents: 'none' }}>
             <span className="mobile-nav-icon" style={{ pointerEvents: 'auto' }}>
-              {/* <Notificaciones /> */}
+              <Notificaciones />
             </span>
-          </button>
+          </button> */}
         )}
         <button className="mobile-nav-btn" onClick={() => setMostrarParejaManager(true)}>
           <span className="mobile-nav-icon">

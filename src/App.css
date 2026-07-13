@@ -1172,11 +1172,13 @@ body {
   .toggle-switch {
     position: relative;
     right: 1px;
+    display: none;
   }
   .toggle-input:checked ~ .toggle-switch {
     /* margin-left: -20px; */
     position: relative;
     left: -12px;
+    display: none;
   }
 
   .sully-widget {

@@ -1163,22 +1163,19 @@ body {
     font-size: 16px !important;
   }
   .toggle {
-    display: none;
-    /* top: 15px;
+    top: 15px;
     right: 10px;
     margin-left: 20px;
-    height: 27px; */
+    height: 27px;
   }
   .toggle-switch {
     position: relative;
     right: 1px;
-    display: none;
   }
   .toggle-input:checked ~ .toggle-switch {
     /* margin-left: -20px; */
     position: relative;
     left: -12px;
-    display: none;
   }
 
   .sully-widget {
@@ -1191,6 +1188,10 @@ body {
     display: flex;
   }
 
+
+  .sidebar {
+    display: none;
+  }
   
   
 }

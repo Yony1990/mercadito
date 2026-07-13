@@ -943,6 +943,14 @@ body {
 
 
 /* TOGGLE DÍA/NOCHE */
+
+.toggle {
+  display: 'flex';
+  align-items: 'center';
+  justify-content: center;
+  flex: 1;
+}
+
 .toggle {
   position: relative;
   display: inline-block;
@@ -1162,14 +1170,12 @@ body {
   input, textarea, select {
     font-size: 16px !important;
   }
-  .alltoggle {
-    display: none;
-  }
   .toggle {
-    top: 15px;
+    display: none;
+    /* top: 15px;
     right: 10px;
     margin-left: 20px;
-    height: 27px;
+    height: 27px; */
   }
   .toggle-switch {
     position: relative;

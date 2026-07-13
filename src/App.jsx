@@ -611,7 +611,10 @@ export default function App() {
     <div className="app-container">
 
       {/* BANNER INVITACIÓN PENDIENTE */}
-      {parejaDoc && <Notificaciones />}
+      <div className="noti1">
+        {parejaDoc && <Notificaciones />}
+      </div>
+      
       {mostrarInvBanner && invPendiente && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 3000,

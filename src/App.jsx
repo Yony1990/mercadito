@@ -611,6 +611,17 @@ export default function App() {
     <div className="app-container">
 
       {/* BANNER INVITACIÓN PENDIENTE */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {parejaDoc && <Notificaciones />}
+            <div className="toggle">
+              <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
+              <div className="toggle-bg"></div>
+              <div className="toggle-switch">
+                <div className="toggle-switch-figure"></div>
+                <div className="toggle-switch-figureAlt"></div>
+              </div>
+            </div>
+          </div>
       {mostrarInvBanner && invPendiente && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 3000,
@@ -640,7 +651,7 @@ export default function App() {
             <ShoppingBag size={26} color="var(--accent)" strokeWidth={2} />
             <span className="logo-text">Mercadito</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {/* <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {parejaDoc && <Notificaciones />}
             <div className="toggle">
               <input className="toggle-input" type="checkbox" checked={darkMode} onChange={() => setDarkMode(p => !p)} />
@@ -650,7 +661,7 @@ export default function App() {
                 <div className="toggle-switch-figureAlt"></div>
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         <nav className="sidebar-nav">

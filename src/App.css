@@ -238,7 +238,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 3px;
+  position: relative;
+  top: 10px;
   flex-shrink: 0;
   transition: all 0.15s;
   background: white;

@@ -61,8 +61,7 @@ body {
   border-radius: 50%;
 }
 
-.logoMerca {
-  display: none;
+.imgContainer .logoMerca {
   width: 40px;
   object-fit: cover;
 }

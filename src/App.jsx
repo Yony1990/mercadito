@@ -412,8 +412,8 @@ export default function App() {
               <button
                 onClick={() => setMostrarLogout(false)}
                 style={{
-                  flex: 1, padding: '10px 0', borderRadius: 10, border: '1.5px solid var(--border)',
-                  background: 'var(--line)', color: 'var(--ink1)', fontSize: 15,
+                  flex: 1, padding: '10px 0', borderRadius: 10, border: '1.5px solid var(--line)',
+                  background: 'var(--paper)', color: 'var(--ink1)', fontSize: 15,
                   fontFamily: 'var(--font-hand)', cursor: 'pointer',
                 }}
               >

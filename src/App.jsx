@@ -412,7 +412,7 @@ export default function App() {
               <button
                 onClick={() => setMostrarLogout(false)}
                 style={{
-                  flex: 1, padding: '10px 0', borderRadius: 10, border: '1.5px solid var(--line)',
+                  flex: 1, padding: '10px 0', borderRadius: 25, border: '1.5px solid var(--line)',
                   background: 'var(--paper)', color: 'var(--ink1)', fontSize: 15,
                   fontFamily: 'var(--font-hand)', cursor: 'pointer',
                 }}
@@ -422,7 +422,7 @@ export default function App() {
               <button
                 onClick={() => { setMostrarLogout(false); logout() }}
                 style={{
-                  flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
+                  flex: 1, padding: '10px 0', borderRadius: 25, border: 'none',
                   background: '#e53935', color: 'white', fontSize: 15,
                   fontFamily: 'var(--font-hand)', cursor: 'pointer', fontWeight: 700,
                 }}

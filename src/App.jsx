@@ -236,7 +236,7 @@ export default function App() {
 
       {/* BANNER INVITACIÓN PENDIENTE */}
       <div className="noti1">
-        {parejaDoc && <Notificaciones />}
+        {parejaDoc && <Notificaciones lista={lista} />}
       </div>
       
       {mostrarInvBanner && invPendiente && (

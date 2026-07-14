@@ -52,6 +52,12 @@ body {
   min-height: 100vh;
 }
 
+.logoMerca {
+  display: none;
+  width: 20px;
+  object-fit: cover;
+}
+
 .noti1 {
   z-index: 1000;
   position: fixed;
@@ -62,7 +68,7 @@ body {
   display: none;
   padding: 10px;
   align-items: center;
-  justify-content: end;
+  justify-content: space-between;
 }
 
 @keyframes ping {
@@ -1244,6 +1250,10 @@ body {
   }
 
   .noti1 {
+    display: flex;
+  }
+
+  .logoMerca {
     display: flex;
   }
 

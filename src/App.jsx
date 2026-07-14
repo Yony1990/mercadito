@@ -13,6 +13,7 @@ import ParejaManager from './components/ParejaManager'
 import Notificaciones from './components/Notificaciones'
 import { useAuth } from './context/AuthContext'
 import { useGrupoData } from './hooks/useGrupoData'
+import logo from '../../public/logo1.PNG'
 import './App.css'
 
 const NAV_ITEMS = [
@@ -236,6 +237,7 @@ export default function App() {
 
       {/* BANNER INVITACIÓN PENDIENTE */}
       <div className="noti1">
+        <img className='logoMerca' src={logo} alt="" />
         {parejaDoc && <Notificaciones lista={lista} />}
       </div>
       

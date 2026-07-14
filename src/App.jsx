@@ -392,7 +392,7 @@ export default function App() {
       {mostrarLogout && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 4000,
-          background: 'rgba(0,0,0,0.45)',
+          background: 'var(--paper)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <div style={{

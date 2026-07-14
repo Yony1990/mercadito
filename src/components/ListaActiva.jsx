@@ -95,14 +95,15 @@ export default function ListaActiva({ lista, setLista, onFinalizar, historial, o
 
           {/* Items por categoría */}
           {Object.values(porCategoria).map(({ cat, items }) => (
-            <div key={cat.id} style={{ marginBottom: '8px' }}>
+            <div className='boxItems' key={cat.id} style={{ marginBottom: '8px' }}>
               <div style={{
                 fontSize: '13px',
                 fontFamily: 'var(--font-body)',
                 color: 'var(--ink3)',
                 padding: '4px 0',
                 borderBottom: `2px solid ${cat.colorBorder || '#eee'}`,
-                marginBottom: '4px'
+                marginBottom: '4px',
+                gap: '10px'
               }}>
                 {cat.nombre}
               </div>

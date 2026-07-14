@@ -217,6 +217,10 @@ body {
   line-height: var(--line-spacing);
 }
 
+.boxItems {
+  background-color: red;
+}
+
 /* ITEMS */
 .item-row {
   display: flex;

@@ -56,7 +56,7 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  background-color: rgb(223, 255, 228);
+  background-color: var(--red-margin);
   padding: 4px;
   border-radius: 50%;
 }

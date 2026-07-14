@@ -305,7 +305,11 @@ export default function App() {
           </button>
         )}
 
-        <button className="btn-logout" onClick={logout}>
+        {/* <button className="btn-logout" onClick={logout}>
+          <LogOut size={14} />
+          Cerrar sesión
+        </button> */}
+        <button className="btn-logout" onClick={() => setMostrarLogout(true)}>
           <LogOut size={14} />
           Cerrar sesión
         </button>
@@ -364,7 +368,11 @@ export default function App() {
           </span>
           <span>{parejaDoc ? parejaDoc.nombre?.split(' ')[0] : 'Pareja'}</span>
         </button>
-        <button className="mobile-nav-btn" onClick={logout}>
+        {/* <button className="mobile-nav-btn" onClick={logout}>
+          <span className="mobile-nav-icon"><LogOut size={18} /></span>
+          <span>Salir</span>
+        </button> */}
+        <button className="mobile-nav-btn" onClick={() => setMostrarLogout(true)}>
           <span className="mobile-nav-icon"><LogOut size={18} /></span>
           <span>Salir</span>
         </button>
@@ -379,6 +387,51 @@ export default function App() {
       </nav>
 
       {mostrarParejaManager && <ParejaManager onClose={() => setMostrarParejaManager(false)} />}
+
+      {mostrarLogout && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 4000,
+          background: 'rgba(0,0,0,0.45)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div style={{
+            background: 'var(--bg)', borderRadius: 16, padding: '28px 24px',
+            width: '88%', maxWidth: 340, textAlign: 'center',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+            fontFamily: 'var(--font-hand)',
+          }}>
+            <div style={{ fontSize: 38, marginBottom: 8 }}>👋</div>
+            <h3 style={{ margin: '0 0 8px', color: 'var(--ink1)', fontSize: 18 }}>
+              ¿Cerrar sesión?
+            </h3>
+            <p style={{ margin: '0 0 24px', color: 'var(--ink3)', fontSize: 14 }}>
+              Vas a salir de tu cuenta de Mercadito.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => setMostrarLogout(false)}
+                style={{
+                  flex: 1, padding: '10px 0', borderRadius: 10, border: '1.5px solid var(--border)',
+                  background: 'var(--bg)', color: 'var(--ink1)', fontSize: 15,
+                  fontFamily: 'var(--font-hand)', cursor: 'pointer',
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => { setMostrarLogout(false); logout() }}
+                style={{
+                  flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
+                  background: '#e53935', color: 'white', fontSize: 15,
+                  fontFamily: 'var(--font-hand)', cursor: 'pointer', fontWeight: 700,
+                }}
+              >
+                Sí, salir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Sully
         open={sullyOpen} setOpen={setSullyOpen}

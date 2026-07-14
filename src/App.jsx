@@ -237,7 +237,10 @@ export default function App() {
 
       {/* BANNER INVITACIÓN PENDIENTE */}
       <div className="noti1">
+      <div className="imgContainer">
         <img className='logoMerca' src={logo} alt="" />
+      </div>
+        
         {parejaDoc && <Notificaciones lista={lista} />}
       </div>
       

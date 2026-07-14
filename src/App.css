@@ -219,7 +219,7 @@ body {
 
 
 /* ITEMS */
-.item-row {
+/* .item-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -227,9 +227,19 @@ body {
   height: var(--line-spacing);
   position: relative;
   z-index: 1;
+} */
+
+.item-row {
+  display: flex;
+  align-items: flex-start;  /* ← cambiar center por flex-start */
+  gap: 10px;
+  padding: 6px 0;           /* ← un poco más de padding vertical */
+  min-height: var(--line-spacing);  /* ← min-height en vez de height */
+  position: relative;
+  z-index: 1;
 }
 
-.item-check {
+/* .item-check {
   width: 22px;
   height: 22px;
   border: 2px solid var(--ink3);
@@ -243,7 +253,23 @@ body {
   flex-shrink: 0;
   transition: all 0.15s;
   background: white;
+} */
+
+.item-check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ink3);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  background: white;
+  margin-top: 2px;  /* ← AGREGAR */
 }
+
 .item-check.checked {
   background: var(--check);
   border-color: var(--check);

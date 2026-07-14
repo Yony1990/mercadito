@@ -56,7 +56,7 @@ export function escucharNotificaciones({ grupoId, miUid, onRecibida }) {
       if (Notification.permission === 'granted') {
         new Notification('🛒 Mercadito', {
           body: `${notif.de} actualizó la lista de compras`,
-          icon: '/icon.png',
+          
           tag: 'mercadito-update',
         })
       }

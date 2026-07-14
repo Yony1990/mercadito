@@ -56,7 +56,7 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  background-color: var(--paper2);
+  background-color: #d1def1;
   padding: 5px;
   border-radius: 50%;
 }

@@ -56,8 +56,8 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  background-color: #d1def1;
-  padding: 5px;
+  background-color: var(--accent);
+  padding: 4px;
   border-radius: 50%;
 }
 

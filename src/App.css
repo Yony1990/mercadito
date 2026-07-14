@@ -204,6 +204,10 @@ body {
 /* MOBILE NAV */
 .mobile-nav { display: none; }
 
+.listactivaall {
+  margin-top: 100px;
+}
+
 /* SECCIÓN TÍTULO */
 .section-title {
   font-family: var(--font-hand);

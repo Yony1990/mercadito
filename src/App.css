@@ -822,7 +822,7 @@ body {
   .sidebar { display: none; }
   .app-main { padding: 12px 12px 80px; }
   .notebook-lines {
-    top: 50px;
+    top: 60px;
     margin-bottom: 100px;
     border-radius: 12px;
     padding: 16px 12px 20px 52px;

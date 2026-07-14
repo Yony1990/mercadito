@@ -57,12 +57,12 @@ body {
   align-items: center;
   justify-content: center;
   background-color: var(--paper2);
-  padding: 10px;
+  padding: 5px;
   border-radius: 50%;
 }
 
 .imgContainer .logoMerca {
-  width: 25px;
+  width: 30px;
   object-fit: cover;
 }
 

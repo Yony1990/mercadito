@@ -23,6 +23,7 @@ const NAV_ITEMS = [
 ]
 
 export default function App() {
+  const [mostrarLogout, setMostrarLogout] = useState(false)
   const { user, userDoc, parejaDoc, grupoId, loading, logout, invPendiente, aceptarInvitacion } = useAuth()
   
   // Desestructuramos catalogoCustom y actualizarCatalogoCustom del hook de Firestore

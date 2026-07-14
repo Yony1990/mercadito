@@ -7,16 +7,23 @@ export default function Notificaciones({ lista = [] }) {
   const [estado, setEstado]                   = useState('idle')
   const [mensaje, setMensaje]                 = useState('')
   const [hayActualizacion, setHayActualizacion] = useState(false)
-  const listaAnteriorRef = useRef(null)
-  const primeraVezRef    = useRef(true)
+  const listaAnteriorRef  = useRef(null)
+  const primeraVezRef     = useRef(true)
+  const bloqueadoRef      = useRef(false) // bloquea el ping después de notificar
 
-  // Detectar cambios en la lista hechos por la pareja
+  // Detectar cambios en la lista
   useEffect(() => {
     const listaStr = JSON.stringify(lista)
 
     // Ignorar la primera carga
     if (primeraVezRef.current) {
       primeraVezRef.current = false
+      listaAnteriorRef.current = listaStr
+      return
+    }
+
+    // Si la lista cambió pero estamos bloqueados (acabamos de notificar), ignorar
+    if (bloqueadoRef.current) {
       listaAnteriorRef.current = listaStr
       return
     }
@@ -42,7 +49,10 @@ export default function Notificaciones({ lista = [] }) {
   }, [mensaje])
 
   const handleClick = async () => {
+    // Apagar el ping y bloquear reactivación por 3 segundos
     setHayActualizacion(false)
+    bloqueadoRef.current = true
+    setTimeout(() => { bloqueadoRef.current = false }, 3000)
 
     if (!parejaDoc) {
       setMensaje('No tenés pareja vinculada')

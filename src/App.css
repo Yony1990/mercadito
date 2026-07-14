@@ -65,6 +65,20 @@ body {
   justify-content: end;
 }
 
+@keyframes ping {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.noti-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid #5b8dd9;
+  animation: ping 1.4s ease-out infinite;
+  pointer-events: none;
+}
+
 /* SIDEBAR */
 /* .sidebar {
   width: 200px;

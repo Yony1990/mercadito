@@ -92,6 +92,7 @@ export default function Notificaciones() {
           flexShrink: 0,
         }}
       >
+        {estado === 'idle' && <span className="noti-ping" />}
         {estado === 'enviando' ? '...' : estado === 'ok' ? '✓' : '🔔'}
       </button>
 

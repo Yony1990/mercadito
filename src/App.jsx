@@ -392,11 +392,11 @@ export default function App() {
       {mostrarLogout && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 4000,
-          background: 'var(--paper)',
+          background: 'rgba(0,0,0,0.45)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <div style={{
-            background: 'var(--bg)', borderRadius: 16, padding: '28px 24px',
+            background: 'var(--paper)', borderRadius: 16, padding: '28px 24px',
             width: '88%', maxWidth: 340, textAlign: 'center',
             boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
             fontFamily: 'var(--font-hand)',
@@ -413,7 +413,7 @@ export default function App() {
                 onClick={() => setMostrarLogout(false)}
                 style={{
                   flex: 1, padding: '10px 0', borderRadius: 10, border: '1.5px solid var(--border)',
-                  background: 'var(--bg)', color: 'var(--ink1)', fontSize: 15,
+                  background: 'var(--line)', color: 'var(--ink1)', fontSize: 15,
                   fontFamily: 'var(--font-hand)', cursor: 'pointer',
                 }}
               >

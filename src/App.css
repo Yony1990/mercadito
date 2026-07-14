@@ -204,9 +204,6 @@ body {
 /* MOBILE NAV */
 .mobile-nav { display: none; }
 
-.listactivaall {
-  margin-top: 100px;
-}
 
 /* SECCIÓN TÍTULO */
 .section-title {
@@ -782,6 +779,7 @@ body {
   .sidebar { display: none; }
   .app-main { padding: 12px 12px 80px; }
   .notebook-lines {
+    top: 50px;
     border-radius: 12px;
     padding: 16px 12px 20px 52px;
     min-height: auto;
@@ -1205,6 +1203,4 @@ body {
     display: flex;
   }
 
-  
-  
 }

@@ -68,7 +68,7 @@ export default function ListaActiva({ lista, setLista, onFinalizar, historial, o
   }
 
   return (
-    <div className='listactivaall' style={{ position: 'relative' }}>
+    <div style={{ position: 'relative' }}>
       <h1 className="section-title">✏️ Mi lista de hoy</h1>
 
       {total === 0 ? (
